@@ -2,8 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, master ] # Se ejecutará cada vez que subas cambios a main o master
-  workflow_dispatch: # Permite ejecutar el proceso manualmente desde la web
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,15 +28,17 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        run: bun install
+        run: |
+          bun install
+          bun add @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Build Web Application
         run: bun run build
 
-      - name: Initialize Capacitor Android
+      - name: Initialize and Sync Android
         run: |
-          bunx capacitor add android || true
-          bunx capacitor sync android
+          node ./node_modules/@capacitor/cli/bin/capacitor android add || true
+          node ./node_modules/@capacitor/cli/bin/capacitor sync android
 
       - name: Build APK with Gradle
         run: |

@@ -35,9 +35,8 @@ jobs:
 
       - name: Initialize Capacitor Android
         run: |
-          bunx cap install
-          bunx cap add android || true
-          bunx cap sync android
+          bunx capacitor add android || true
+          bunx capacitor sync android
 
       - name: Build APK with Gradle
         run: |

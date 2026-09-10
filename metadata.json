@@ -1,0 +1,6 @@
+{
+  "name": "Vlc AstroPlaner",
+  "description": "Previsión meteorológica y astronómica para astrofotografía con Night Score, gráficos horarios, nubosidad, transparencia y punto de rocío.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

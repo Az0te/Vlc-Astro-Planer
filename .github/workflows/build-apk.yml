@@ -37,7 +37,7 @@ jobs:
 
       - name: Initialize and Sync Android
         run: |
-          node ./node_modules/@capacitor/cli/bin/capacitor android add || true
+          node ./node_modules/@capacitor/cli/bin/capacitor add android
           node ./node_modules/@capacitor/cli/bin/capacitor sync android
 
       - name: Build APK with Gradle

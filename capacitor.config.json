@@ -1,0 +1,6 @@
+{
+  "appId": "com.vlc.astroplaner",
+  "appName": "Vlc AstroPlaner",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

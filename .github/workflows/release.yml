@@ -7,6 +7,8 @@ on:
   push:
     tags:
       - 'v*' # v1.0.0, v1.0.1, etc.
+      - 'V*' # Los tags de GitHub Actions distinguen mayúsculas/minúsculas;
+             # esto cubre también V1.0.0, V1.0.1, etc.
   workflow_dispatch: # Permite lanzarlo a mano para probar sin crear un tag
 
 permissions:

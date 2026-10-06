@@ -2,6 +2,8 @@
   "name": "react-example",
   "private": true,
   "version": "0.0.0",
+  "description": "Previsión meteorológica y astronómica para astrofotografía: Night Score, gráficos horarios, nubosidad, transparencia y punto de rocío.",
+  "author": "Az0te",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -29,7 +31,7 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallDirectory": true,
+      "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }

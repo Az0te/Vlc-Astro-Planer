@@ -30,7 +30,7 @@ jobs:
       - name: Install Dependencies
         run: |
           bun install
-          bun add qrcode @types/qrcode  # <-- AÑADIMOS LA LIBRERÍA DE QR Y SUS TIPOS DE TS
+          bun add qrcode @types/qrcode jsqr @types/jsqr  # <-- AÑADIMOS TAMBIÉN JSQR AQUÍ
           bun add @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Build Web Application

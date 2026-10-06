@@ -1,4 +1,7 @@
 name: Build Android APK
+uses: android-actions/setup-android@v3  # O la versión que estés usando v2/v4
+  with:
+    packages: 'platform-tools'  # <--- ESTA LÍNEA EVITA QUE INTENTE DESCARGAR 'tools'
 
 on:
   push:

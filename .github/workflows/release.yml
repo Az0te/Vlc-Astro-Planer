@@ -1,0 +1,140 @@
+name: Build & Release (Android APK + Windows EXE)
+
+# Un único workflow en vez de dos, para evitar que dos flujos distintos
+# intenten crear/editar el mismo Release de GitHub al mismo tiempo
+# (esa condición de carrera era la causa de que la publicación fallara).
+on:
+  push:
+    tags:
+      - 'v*' # v1.0.0, v1.0.1, etc.
+  workflow_dispatch: # Permite lanzarlo a mano para probar sin crear un tag
+
+permissions:
+  contents: write # Necesario para crear/editar Releases
+
+jobs:
+  # --------------------------------------------------------------------
+  # 1) ANDROID: compila el APK y lo deja listo dentro de su propio ZIP
+  # --------------------------------------------------------------------
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          bun install
+          bun add qrcode @types/qrcode jsqr
+          bun add @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Build web app
+        run: bun run build
+
+      - name: Initialize and sync Android
+        run: |
+          node ./node_modules/@capacitor/cli/bin/capacitor add android || true
+          node ./node_modules/@capacitor/cli/bin/capacitor sync android
+
+      - name: Build APK with Gradle
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Rename and zip APK
+        shell: bash
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/Vlc-Astro-Planer-${GITHUB_REF_NAME}.apk"
+          cd out
+          zip "Vlc-Astro-Planer-${GITHUB_REF_NAME}-android.zip" "Vlc-Astro-Planer-${GITHUB_REF_NAME}.apk"
+          rm "Vlc-Astro-Planer-${GITHUB_REF_NAME}.apk"
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-package
+          path: out/*-android.zip
+
+  # --------------------------------------------------------------------
+  # 2) WINDOWS: compila el .exe real con Electron (instalador + portable)
+  #    y lo deja listo dentro de su propio ZIP, distinto del del APK
+  # --------------------------------------------------------------------
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          bun install
+          bun add qrcode jsqr
+
+      - name: Build web app
+        run: bun run build
+
+      - name: Build Windows EXE (installer + portable) with electron-builder
+        run: bunx electron-builder --win --publish never
+
+      - name: Zip Windows build output
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Compress-Archive -Path "release/*.exe" -DestinationPath "out/Vlc-Astro-Planer-${env:GITHUB_REF_NAME}-windows.zip"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: out/*-windows.zip
+
+  # --------------------------------------------------------------------
+  # 3) RELEASE: un único paso que sube AMBOS zips al mismo Release,
+  #    así nunca compiten dos jobs por crear/editar el Release a la vez
+  # --------------------------------------------------------------------
+  release:
+    needs: [build-android, build-windows]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-package
+          path: android-package
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-package
+          path: windows-package
+
+      - name: Create GitHub Release with both ZIPs
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "android-package/*.zip,windows-package/*.zip"
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}

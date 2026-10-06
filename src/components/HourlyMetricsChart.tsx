@@ -26,6 +26,7 @@ import {
   Wind,
   ShieldCheck,
   AlertTriangle,
+  Droplets,
 } from 'lucide-react';
 
 interface HourlyMetricsChartProps {
@@ -232,6 +233,18 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
   // Default to 7days (or 48h) so scrolling to the right naturally reveals all future days of forecast!
   const [timelineSpan, setTimelineSpan] = useState<TimelineSpan>('7days');
   const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
+
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -944,10 +957,17 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                   unit="%"
                 />
 
-                {/* Hidden cursor tooltip to avoid duplicate popups */}
+                {/* Interactive cursor tooltip with 4 hours of distance separation and smart left-flip past half-screen */}
                 <Tooltip
-                  content={() => null}
+                  content={
+                    <CustomMainChartTooltip
+                      nightName={night.isTonight ? 'Esta noche' : night.dayName}
+                      scrollContainerRef={scrollContainerRef}
+                    />
+                  }
+                  position={{ x: 0 }}
                   cursor={{ stroke: '#06b6d4', strokeWidth: 1.5, strokeDasharray: '3 3' }}
+                  isAnimationActive={false}
                 />
 
                 {/* INVISIBLE TOUCH/HOVER HIT-TEST BARS:
@@ -1142,6 +1162,129 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
             <span className="h-0.5 w-3 bg-rose-500 border border-rose-400" />
             <span>&gt; 20 km/h: Vibración en montura</span>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Custom interactive tooltip with exact 4-hour horizontal separation.
+// Rule: If advancing past half the screen (> 50%), flip to the left side!
+// Always clamped within visible viewport so it is never cut off.
+const CustomMainChartTooltip = ({
+  active,
+  payload,
+  nightName,
+  coordinate,
+  viewBox,
+  scrollContainerRef,
+}: any) => {
+  if (!active || !payload || !payload.length) return null;
+  const data: ChartPoint = payload[0]?.payload;
+  if (!data) return null;
+
+  const cursorX = coordinate?.x ?? 0;
+  const scrollContainer = scrollContainerRef?.current;
+  const scrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
+  const clientWidth = scrollContainer ? scrollContainer.clientWidth : (viewBox?.width || 1000);
+
+  // The middle of the visible screen for the user:
+  const halfVisibleScreen = scrollLeft + clientWidth / 2;
+
+  // If advancing past half the screen to the right (> 50%),
+  // the text box must pass to the left side!
+  const isPastHalf = cursorX > halfVisibleScreen;
+
+  // 4 hours distance in pixels (each hour is ~68px in the main chart):
+  const hourStep = 68;
+  const fourHoursDistance = Math.round(hourStep * 4); // 272px
+  const cardWidth = 230;
+
+  let targetX: number;
+  if (isPastHalf) {
+    // Left side of the cursor by 4 hours
+    targetX = cursorX - fourHoursDistance - cardWidth;
+  } else {
+    // Right side of the cursor by 4 hours
+    targetX = cursorX + fourHoursDistance;
+  }
+
+  // Ensure it is ALWAYS 100% visible inside the user's visible viewport!
+  const minX = scrollLeft + 8;
+  const maxX = scrollLeft + clientWidth - cardWidth - 8;
+  targetX = Math.max(minX, Math.min(maxX, targetX));
+
+  return (
+    <div
+      style={{
+        transform: `translateX(${targetX}px)`,
+      }}
+      className="pointer-events-none select-none rounded-xl border border-cyan-500/40 bg-slate-950/95 p-3 text-xs shadow-2xl backdrop-blur-md text-slate-200 space-y-1.5 w-[230px]"
+    >
+      <div className="flex items-center justify-between border-b border-slate-800 pb-1 font-mono">
+        <span className="font-bold text-white truncate max-w-[140px]">
+          {data.dayLabel || nightName} • {data.time} h
+        </span>
+        <span
+          className={`px-1.5 py-0.2 rounded font-bold ${
+            data.nightScore >= 70
+              ? 'bg-emerald-500/20 text-emerald-300'
+              : data.nightScore >= 50
+              ? 'bg-amber-500/20 text-amber-300'
+              : 'bg-rose-500/20 text-rose-300'
+          }`}
+        >
+          {data.nightScore}/100
+        </span>
+      </div>
+
+      <div className="space-y-1 text-[11px] font-mono">
+        <div className="flex items-center justify-between">
+          <span className="text-cyan-400 flex items-center gap-1">
+            <Sparkles className="h-3 w-3" /> Night Score:
+          </span>
+          <span className="font-bold text-white">{data.nightScore}%</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-rose-400 flex items-center gap-1">
+            <Cloud className="h-3 w-3" /> Nubosidad:
+          </span>
+          <span className="font-bold text-white">{data.clouds}%</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-purple-400 flex items-center gap-1">
+            <Droplets className="h-3 w-3" /> Margen Rocío:
+          </span>
+          <span className="font-bold text-white">
+            Δ {data.spread}°C (T:{data.temp}° / R:{data.dewPoint}°)
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sky-400 flex items-center gap-1">
+            <Eye className="h-3 w-3" /> Transparencia:
+          </span>
+          <span className="font-bold text-white">{data.transparency}%</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-orange-400 flex items-center gap-1">
+            <Wind className="h-3 w-3" /> Viento / Rachas:
+          </span>
+          <span className="font-bold text-white">
+            {data.windSpeedKmh} / {data.windGustKmh} km/h
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
+          <span className="text-amber-400 flex items-center gap-1">
+            <Sun className="h-3 w-3" /> Luz Solar:
+          </span>
+          <span className="font-bold text-slate-300">
+            {data.isAstroDark ? 'Noche Oscura (< -18°)' : `${data.sunlightPct}% Crepúsculo`}
+          </span>
         </div>
       </div>
     </div>

@@ -21,8 +21,9 @@ import { TargetRecommender } from './components/TargetRecommender';
 import { LocationSelectorModal } from './components/LocationSelectorModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { ApiSyncModal } from './components/ApiSyncModal';
+import { WeeklyStackedCharts } from './components/WeeklyStackedCharts';
 import { parseSyncPayload } from './services/apiSyncService';
-import { AlertCircle, Sparkles, QrCode, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Sparkles, QrCode, CheckCircle2, CalendarRange, ChevronDown } from 'lucide-react';
 
 const STORAGE_KEYS = {
   API_KEY: 'vlc_ow_api_key',
@@ -96,6 +97,7 @@ export default function App() {
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [syncModalMode, setSyncModalMode] = useState<'export' | 'import'>('export');
   const [syncNotification, setSyncNotification] = useState<string | null>(null);
+  const [showWeeklyCharts, setShowWeeklyCharts] = useState(false);
 
   // Detect if user opened with a QR sync URL (#sync=...)
   useEffect(() => {
@@ -326,6 +328,37 @@ export default function App() {
               nights={nights}
               onSelectNight={(id) => setSelectedNightId(id)}
             />
+
+            {/* Botón justo al final de Evolución Horaria & Pronóstico Continuo y antes de Evolución Horaria de la Noche Astronómica */}
+            <div className="flex flex-col items-center justify-center py-1">
+              <button
+                type="button"
+                onClick={() => setShowWeeklyCharts(!showWeeklyCharts)}
+                className="group flex items-center gap-2.5 px-6 py-3.5 rounded-2xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/70 via-slate-900 to-blue-950/70 hover:from-cyan-900/90 hover:to-blue-900/90 text-cyan-200 hover:text-white font-bold text-xs sm:text-sm shadow-xl shadow-cyan-950/40 transition-all hover:scale-[1.01] hover:border-cyan-400"
+              >
+                <CalendarRange className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>
+                  {showWeeklyCharts
+                    ? 'Ocultar gráfico apilado de toda la semana (7 días)'
+                    : 'Mostrar gráfico apilado de toda la semana (7 días)'}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 text-cyan-400 transition-transform duration-300 ${
+                    showWeeklyCharts ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* 7-Day Stacked Charts (Day by day, one below the other with complete symbol legend) */}
+            {showWeeklyCharts && (
+              <WeeklyStackedCharts
+                nights={nights}
+                selectedNightId={selectedNight.id}
+                onSelectNight={(id) => setSelectedNightId(id)}
+                onClose={() => setShowWeeklyCharts(false)}
+              />
+            )}
 
             {/* 6. Hourly Night Detailed Timeline from Dusk to Dawn */}
             <HourlyNightTimeline night={selectedNight} />

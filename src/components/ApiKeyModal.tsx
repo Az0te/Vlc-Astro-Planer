@@ -12,6 +12,8 @@ import {
   ToggleLeft,
   ToggleRight,
   Info,
+  QrCode,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { ForecastStrategy, MultiModelSettings, WeatherProviderId } from '../types';
 import { STRATEGY_DETAILS, WEATHER_PROVIDERS_META } from '../services/ensembleService';
@@ -21,6 +23,7 @@ interface ApiKeyModalProps {
   onClose: () => void;
   settings: MultiModelSettings;
   onSaveSettings: (newSettings: MultiModelSettings) => void;
+  onOpenSyncModal?: (mode: 'export' | 'import') => void;
 }
 
 export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
@@ -28,6 +31,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   onClose,
   settings,
   onSaveSettings,
+  onOpenSyncModal,
 }) => {
   const [localSettings, setLocalSettings] = useState<MultiModelSettings>(settings);
   const [testingProvider, setTestingProvider] = useState<WeatherProviderId | null>(null);
@@ -269,13 +273,26 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
-            title="Cerrar ventana"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenSyncModal && (
+              <button
+                type="button"
+                onClick={() => onOpenSyncModal('export')}
+                className="flex items-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-1.5 text-xs font-semibold text-cyan-300 transition"
+                title="Sincronizar claves con QR entre Desktop y Móvil"
+              >
+                <QrCode className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">QR Sync</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+              title="Cerrar ventana"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Scrollable Body */}
@@ -330,6 +347,49 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
               })}
             </div>
           </div>
+
+          {/* QR Code / Desktop Sync Banner */}
+          {onOpenSyncModal && (
+            <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-blue-950/20 to-slate-900/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
+                  <QrCode className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-white">
+                      Exportar / Importar con QR o Desktop
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      Rápido
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Pasa tus claves entre el ordenador y el móvil al instante escaneando un código QR.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => onOpenSyncModal('export')}
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition"
+                >
+                  <QrCode className="h-3.5 w-3.5 text-cyan-400" />
+                  <span>Mostrar QR</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenSyncModal('import')}
+                  className="flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/15 hover:bg-cyan-500/25 px-3 py-1.5 text-xs font-bold text-cyan-300 transition"
+                >
+                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                  <span>Escanear / Importar</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Providers List */}
           <div className="space-y-3">

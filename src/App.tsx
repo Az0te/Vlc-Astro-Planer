@@ -20,7 +20,9 @@ import { EphemerisAndMoon } from './components/EphemerisAndMoon';
 import { TargetRecommender } from './components/TargetRecommender';
 import { LocationSelectorModal } from './components/LocationSelectorModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { ApiSyncModal } from './components/ApiSyncModal';
+import { parseSyncPayload } from './services/apiSyncService';
+import { AlertCircle, Sparkles, QrCode, CheckCircle2 } from 'lucide-react';
 
 const STORAGE_KEYS = {
   API_KEY: 'vlc_ow_api_key',
@@ -91,6 +93,32 @@ export default function App() {
   // Modals
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncModalMode, setSyncModalMode] = useState<'export' | 'import'>('export');
+  const [syncNotification, setSyncNotification] = useState<string | null>(null);
+
+  // Detect if user opened with a QR sync URL (#sync=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (hash && hash.includes('sync=')) {
+      try {
+        const parsed = parseSyncPayload(hash);
+        if (parsed.valid && parsed.settings) {
+          setIsSyncModalOpen(true);
+          setSyncModalMode('import');
+          // Clean hash without reloading
+          try {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch {
+            // ignore
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to parse URL sync hash:', err);
+      }
+    }
+  }, []);
 
   // Load forecast
   const loadForecast = useCallback(
@@ -168,6 +196,34 @@ export default function App() {
     loadForecast(location, newSettings);
   };
 
+  // Handle open sync modal
+  const handleOpenSyncModal = (mode: 'export' | 'import' = 'export') => {
+    setSyncModalMode(mode);
+    setIsSyncModalOpen(true);
+  };
+
+  // Handle apply sync settings imported via QR / file / code
+  const handleApplySyncSettings = (newSettings: MultiModelSettings, newLocation?: LocationData) => {
+    setMultiSettings(newSettings);
+    localStorage.setItem(STORAGE_KEYS.MULTI_SETTINGS, JSON.stringify(newSettings));
+    if (newSettings.providers.openweather?.apiKey) {
+      localStorage.setItem(STORAGE_KEYS.API_KEY, newSettings.providers.openweather.apiKey);
+    }
+
+    const targetLoc = newLocation || location;
+    if (newLocation) {
+      setLocation(newLocation);
+      localStorage.setItem(STORAGE_KEYS.LOCATION, JSON.stringify(newLocation));
+    }
+
+    setSyncNotification('¡APIs y configuración sincronizadas con éxito!');
+    loadForecast(targetLoc, newSettings);
+
+    setTimeout(() => {
+      setSyncNotification(null);
+    }, 6000);
+  };
+
   // Selected night object
   const selectedNight =
     nights.find((n) => n.id === selectedNightId) || (nights.length > 0 ? nights[0] : null);
@@ -189,6 +245,22 @@ export default function App() {
 
       {/* Main dashboard content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-6 space-y-6">
+        {/* Sync Success Banner */}
+        {syncNotification && (
+          <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-4 text-xs text-emerald-200 flex items-center justify-between gap-3 shadow-lg animate-fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+              <span className="font-semibold">{syncNotification}</span>
+            </div>
+            <button
+              onClick={() => setSyncNotification(null)}
+              className="text-emerald-400 hover:text-white font-mono text-sm px-1 shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Error / Notice Alert Banner */}
         {errorNotice && (
           <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/40 p-4 text-xs text-cyan-200 flex items-center justify-between gap-3 shadow-lg">
@@ -319,6 +391,16 @@ export default function App() {
         onClose={() => setIsKeyModalOpen(false)}
         settings={multiSettings}
         onSaveSettings={handleSaveMultiSettings}
+        onOpenSyncModal={handleOpenSyncModal}
+      />
+
+      <ApiSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        currentSettings={multiSettings}
+        currentLocation={location}
+        onApplySettings={handleApplySyncSettings}
+        initialMode={syncModalMode}
       />
 
       <LocationSelectorModal

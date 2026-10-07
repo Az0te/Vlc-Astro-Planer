@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <radialGradient id="nebula" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#06b6d4" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#bg)" />
+  <circle cx="256" cy="220" r="180" fill="url(#nebula)" />
+  
+  <!-- Stars -->
+  <circle cx="100" cy="120" r="3" fill="#ffffff" opacity="0.8" />
+  <circle cx="160" cy="80" r="2" fill="#38bdf8" opacity="0.9" />
+  <circle cx="390" cy="110" r="3" fill="#ffffff" opacity="0.85" />
+  <circle cx="440" cy="170" r="2" fill="#38bdf8" opacity="0.7" />
+  <circle cx="80" cy="260" r="2.5" fill="#e0f2fe" opacity="0.6" />
+  <circle cx="420" cy="290" r="2" fill="#ffffff" opacity="0.8" />
+  
+  <!-- Crescent Moon -->
+  <path d="M 330 140 A 55 55 0 1 0 380 230 A 68 68 0 0 1 330 140 Z" fill="url(#cyanGrad)" opacity="0.9" />
+
+  <!-- Telescope silhouette & optics -->
+  <g transform="translate(140, 160)">
+    <!-- Tripod -->
+    <line x1="116" y1="170" x2="30" y2="280" stroke="#475569" stroke-width="8" stroke-linecap="round" />
+    <line x1="116" y1="170" x2="116" y2="290" stroke="#64748b" stroke-width="8" stroke-linecap="round" />
+    <line x1="116" y1="170" x2="202" y2="280" stroke="#475569" stroke-width="8" stroke-linecap="round" />
+    <!-- Mount -->
+    <circle cx="116" cy="165" r="14" fill="#0284c7" />
+    <!-- Tube -->
+    <path d="M 50 190 L 195 95 L 210 115 L 65 210 Z" fill="#0ea5e9" opacity="0.95" />
+    <rect x="185" y="90" width="30" height="30" rx="4" transform="rotate(-33 200 105)" fill="#38bdf8" />
+    <!-- Eyepiece / camera -->
+    <rect x="68" y="185" width="20" height="12" rx="3" transform="rotate(57 78 191)" fill="#e2e8f0" />
+    <circle cx="215" cy="95" r="10" fill="#a5f3fc" opacity="0.8" />
+  </g>
+</svg>

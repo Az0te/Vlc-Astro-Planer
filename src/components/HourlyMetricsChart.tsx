@@ -601,47 +601,47 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
 
       {/* DYNAMIC LIVE VALUES PANEL ABOVE THE CHART (Updates with mouse movement across the chart) */}
       {displayedPoint && (
-        <div className="rounded-2xl border border-cyan-500/30 bg-[#090e1d]/90 p-3 sm:p-4 space-y-2.5 shadow-xl backdrop-blur-md">
+        <div className="rounded-xl sm:rounded-2xl border border-cyan-500/30 bg-[#090e1d]/90 p-2 sm:p-3.5 space-y-1.5 sm:space-y-2.5 shadow-xl backdrop-blur-md">
           {/* Header of the Inspector: Time, Day, Cursor Inspection Status, Score, Guiding Status */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono font-bold text-white text-xs sm:text-sm bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 flex items-center gap-1.5 shadow-inner">
-                <Clock className="h-3.5 w-3.5 text-cyan-400" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-slate-800/80 pb-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-mono font-bold text-white text-xs bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-700 flex items-center gap-1 shadow-inner">
+                <Clock className="h-3 w-3 text-cyan-400" />
                 <span>{displayedPoint.time} h</span>
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-slate-200">
+              <span className="text-xs font-semibold text-slate-200">
                 {displayedPoint.dayLabel}
               </span>
 
               {/* Cursor indicator */}
               {isInspecting ? (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1.5 animate-pulse">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                  <span>Lectura en cursor</span>
+                <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1 animate-pulse">
+                  <span className="h-1 w-1 rounded-full bg-cyan-400" />
+                  <span>En cursor</span>
                 </span>
               ) : (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400/80" />
-                  <span>Pico de la noche (mueve el ratón por la gráfica para explorar)</span>
+                <span className="text-[9px] font-medium px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
+                  <span className="h-1 w-1 rounded-full bg-cyan-400/80" />
+                  <span>Pico noche</span>
                 </span>
               )}
 
               {/* Twilight Stage */}
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">
+              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700 hidden sm:inline">
                 {displayedPoint.twilightLabel}
               </span>
             </div>
 
             {/* Score & Mount Status */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {(() => {
                 const sc = getScoreSegmentStyle(displayedPoint.nightScore);
                 return (
                   <div
-                    className={`flex items-center gap-1 text-xs font-mono font-bold px-2.5 py-1 rounded-xl border shadow-sm ${sc.bgClass} ${sc.borderClass} ${sc.textClass}`}
+                    className={`flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border shadow-sm ${sc.bgClass} ${sc.borderClass} ${sc.textClass}`}
                   >
                     <span>Score: {displayedPoint.nightScore}/100</span>
-                    <span className="text-[10px] opacity-80 uppercase tracking-wide">({sc.label})</span>
+                    <span className="text-[9px] opacity-80 uppercase tracking-wide">({sc.label})</span>
                   </div>
                 );
               })()}
@@ -650,10 +650,10 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                 const mount = getMountWindStatus(displayedPoint.windSpeedKmh, displayedPoint.windGustKmh);
                 return (
                   <div
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-xl border flex items-center gap-1.5 ${mount.badgeClass}`}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-lg border flex items-center gap-1 ${mount.badgeClass}`}
                     title={mount.tip}
                   >
-                    <Wind className="h-3 w-3" />
+                    <Wind className="h-2.5 w-2.5" />
                     <span>{mount.status}</span>
                   </div>
                 );
@@ -662,43 +662,43 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
           </div>
 
           {/* Metric Values Grid (Live-updated as cursor moves) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-2">
             {/* 1. Viento & Rachas */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Wind className="h-3 w-3 text-teal-400" />
+                  <Wind className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-teal-400" />
                   Viento
                 </span>
-                <span className="text-[10px] font-mono text-amber-400">
-                  Racha {displayedPoint.windGustKmh}k
+                <span className="text-[9px] sm:text-[10px] font-mono text-amber-400">
+                  R{displayedPoint.windGustKmh}k
                 </span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1">
-                <span className="text-lg sm:text-xl font-mono font-extrabold text-teal-300">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
+                <span className="text-sm sm:text-xl font-mono font-extrabold text-teal-300">
                   {displayedPoint.windSpeedKmh}
                 </span>
-                <span className="text-[10px] text-slate-400">km/h</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-400">km/h</span>
               </div>
-              <span className="text-[9px] text-slate-500 block truncate">
-                {displayedPoint.windSpeedKmh <= 15 ? 'Guiado óptimo' : displayedPoint.windSpeedKmh <= 20 ? 'Tolerable' : 'Riesgo guiado'}
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block truncate">
+                {displayedPoint.windSpeedKmh <= 15 ? 'Óptimo' : 'Riesgo'}
               </span>
             </div>
 
             {/* 2. Nubosidad */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Cloud className="h-3 w-3 text-orange-400" />
+                  <Cloud className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-400" />
                   Nubes
                 </span>
-                <span className="text-[10px] text-slate-400">
-                  {displayedPoint.clouds <= 20 ? 'Despejado' : displayedPoint.clouds <= 50 ? 'Parcial' : 'Cubierto'}
+                <span className="text-[9px] sm:text-[10px] text-slate-400">
+                  {displayedPoint.clouds <= 20 ? 'Despej.' : 'Parcial'}
                 </span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
                 <span
-                  className={`text-lg sm:text-xl font-mono font-extrabold ${
+                  className={`text-sm sm:text-xl font-mono font-extrabold ${
                     displayedPoint.clouds <= 20
                       ? 'text-emerald-400'
                       : displayedPoint.clouds <= 50
@@ -708,107 +708,107 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                 >
                   {displayedPoint.clouds}%
                 </span>
-                <span className="text-[10px] text-slate-400">cubierto</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-400">cub</span>
               </div>
-              <span className="text-[9px] text-slate-500 block truncate">
-                {displayedPoint.clouds === 0 ? 'Cielo limpio' : 'Cobertura'}
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block truncate">
+                {displayedPoint.clouds === 0 ? 'Limpio' : 'Cobertura'}
               </span>
             </div>
 
             {/* 3. Transparencia */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-purple-400" />
-                  Transparencia
+                  <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-purple-400" />
+                  Transp.
                 </span>
-                <span className="text-[10px] text-purple-400 font-mono">
+                <span className="text-[9px] sm:text-[10px] text-purple-400 font-mono">
                   {displayedPoint.transparency >= 80 ? 'Alta' : 'Media'}
                 </span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1">
-                <span className="text-lg sm:text-xl font-mono font-extrabold text-purple-300">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
+                <span className="text-sm sm:text-xl font-mono font-extrabold text-purple-300">
                   {displayedPoint.transparency}%
                 </span>
-                <span className="text-[10px] text-slate-400">claridad</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-400">claridad</span>
               </div>
-              <span className="text-[9px] text-slate-500 block truncate">
-                Dispersión lumínica
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block truncate">
+                Dispersión
               </span>
             </div>
 
             {/* 4. Visibilidad */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3 text-sky-400" />
-                  Visibilidad
+                  <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-sky-400" />
+                  Visib.
                 </span>
-                <span className="text-[10px] text-sky-400 font-mono">Radio</span>
+                <span className="text-[9px] sm:text-[10px] text-sky-400 font-mono">Radio</span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1">
-                <span className="text-lg sm:text-xl font-mono font-extrabold text-sky-300">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
+                <span className="text-sm sm:text-xl font-mono font-extrabold text-sky-300">
                   {displayedPoint.visibilityKm}
                 </span>
-                <span className="text-[10px] text-slate-400">km</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-400">km</span>
               </div>
-              <span className="text-[9px] text-slate-500 block truncate">
-                Alcance horizontal
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block truncate">
+                Horizontal
               </span>
             </div>
 
             {/* 5. Temp / Margen Rocío */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>Temp / Rocío</span>
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
+                <span>ΔT Rocío</span>
                 <span
-                  className={`text-[10px] font-mono font-bold ${
+                  className={`text-[9px] sm:text-[10px] font-mono font-bold ${
                     displayedPoint.spread <= 2 ? 'text-rose-400' : 'text-emerald-400'
                   }`}
                 >
-                  ΔT {displayedPoint.spread}°C
+                  Δ{displayedPoint.spread}°
                 </span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1.5">
-                <span className="text-lg sm:text-xl font-mono font-extrabold text-white">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
+                <span className="text-sm sm:text-xl font-mono font-extrabold text-white">
                   {displayedPoint.temp}°C
                 </span>
-                <span className="text-[10px] text-slate-400">
-                  (Rocío {displayedPoint.dewPoint}°C)
+                <span className="text-[9px] sm:text-[10px] text-slate-400">
+                  (R:{displayedPoint.dewPoint}°)
                 </span>
               </div>
               <span
-                className={`text-[9px] block truncate font-mono ${
+                className={`text-[8px] sm:text-[9px] block truncate font-mono ${
                   displayedPoint.spread <= 2 ? 'text-rose-400 font-bold' : 'text-slate-500'
                 }`}
               >
-                {displayedPoint.spread <= 2 ? '⚠️ Alerta condensación' : 'Margen seguro'}
+                {displayedPoint.spread <= 2 ? '⚠️ Alerta rocío' : 'Seguro'}
               </span>
             </div>
 
             {/* 6. Luz Solar */}
-            <div className="p-2 sm:p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 text-center sm:text-left">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900/80 border border-slate-800/90 text-left">
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Sun className="h-3 w-3 text-amber-400" />
-                  Luz Solar
+                  <Sun className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-400" />
+                  Sol
                 </span>
-                <span className="text-[10px] font-mono text-amber-400">
-                  Sol {displayedPoint.sunAlt}°
+                <span className="text-[9px] sm:text-[10px] font-mono text-amber-400">
+                  {displayedPoint.sunAlt}°
                 </span>
               </div>
-              <div className="mt-1 flex items-baseline justify-center sm:justify-start gap-1">
+              <div className="mt-0.5 sm:mt-1 flex items-baseline justify-start gap-1">
                 <span
-                  className={`text-lg sm:text-xl font-mono font-extrabold ${
+                  className={`text-sm sm:text-xl font-mono font-extrabold ${
                     displayedPoint.sunlightPct === 0 ? 'text-cyan-300' : 'text-amber-400'
                   }`}
                 >
                   {displayedPoint.sunlightPct}%
                 </span>
-                <span className="text-[10px] text-slate-400">luz</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-400">luz</span>
               </div>
-              <span className="text-[9px] text-slate-500 block truncate">
-                {displayedPoint.isAstroDark ? 'Oscuridad astronómica' : 'Crepúsculo'}
+              <span className="text-[8px] sm:text-[9px] text-slate-500 block truncate">
+                {displayedPoint.isAstroDark ? 'Oscura' : 'Crepúsculo'}
               </span>
             </div>
           </div>
@@ -864,7 +864,7 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
             ))}
           </div>
 
-          <div style={{ width: `${chartPixelWidth}px` }} className="h-72 sm:h-80">
+          <div style={{ width: `${chartPixelWidth}px` }} className="h-32 sm:h-52 md:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={chartData}
@@ -1198,7 +1198,8 @@ const CustomMainChartTooltip = ({
   // 4 hours distance in pixels (each hour is ~68px in the main chart):
   const hourStep = 68;
   const fourHoursDistance = Math.round(hourStep * 4); // 272px
-  const cardWidth = 230;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const cardWidth = isMobile ? 95 : 180;
 
   let targetX: number;
   if (isPastHalf) {
@@ -1210,8 +1211,8 @@ const CustomMainChartTooltip = ({
   }
 
   // Ensure it is ALWAYS 100% visible inside the user's visible viewport!
-  const minX = scrollLeft + 8;
-  const maxX = scrollLeft + clientWidth - cardWidth - 8;
+  const minX = scrollLeft + 4;
+  const maxX = scrollLeft + clientWidth - cardWidth - 4;
   targetX = Math.max(minX, Math.min(maxX, targetX));
 
   return (
@@ -1219,14 +1220,14 @@ const CustomMainChartTooltip = ({
       style={{
         transform: `translateX(${targetX}px)`,
       }}
-      className="pointer-events-none select-none rounded-xl border border-cyan-500/40 bg-slate-950/95 p-3 text-xs shadow-2xl backdrop-blur-md text-slate-200 space-y-1.5 w-[230px]"
+      className="pointer-events-none select-none rounded-xl border border-cyan-500/40 bg-slate-950/95 p-1 sm:p-2.5 text-xs shadow-2xl backdrop-blur-md text-slate-200 space-y-0.5 sm:space-y-1 w-[95px] sm:w-[180px]"
     >
-      <div className="flex items-center justify-between border-b border-slate-800 pb-1 font-mono">
-        <span className="font-bold text-white truncate max-w-[140px]">
-          {data.dayLabel || nightName} • {data.time} h
+      <div className="flex items-center justify-between border-b border-slate-800 pb-0.5 font-mono">
+        <span className="font-bold text-white truncate max-w-[55px] sm:max-w-[125px] text-[8px] sm:text-xs">
+          {data.time}h
         </span>
         <span
-          className={`px-1.5 py-0.2 rounded font-bold ${
+          className={`px-1 py-0.2 rounded font-extrabold text-[7.5px] sm:text-[10px] ${
             data.nightScore >= 70
               ? 'bg-emerald-500/20 text-emerald-300'
               : data.nightScore >= 50
@@ -1234,56 +1235,52 @@ const CustomMainChartTooltip = ({
               : 'bg-rose-500/20 text-rose-300'
           }`}
         >
-          {data.nightScore}/100
+          {data.nightScore}
         </span>
       </div>
 
-      <div className="space-y-1 text-[11px] font-mono">
+      <div className="space-y-0.5 text-[7.5px] sm:text-[10px] font-mono leading-tight">
         <div className="flex items-center justify-between">
-          <span className="text-cyan-400 flex items-center gap-1">
-            <Sparkles className="h-3 w-3" /> Night Score:
+          <span className="text-cyan-400 flex items-center gap-0.5">
+            <Sparkles className="h-2 w-2 sm:h-3 sm:w-3" /> Score:
           </span>
           <span className="font-bold text-white">{data.nightScore}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-rose-400 flex items-center gap-1">
-            <Cloud className="h-3 w-3" /> Nubosidad:
+          <span className="text-rose-400 flex items-center gap-0.5">
+            <Cloud className="h-2 w-2 sm:h-3 sm:w-3" /> Nubes:
           </span>
           <span className="font-bold text-white">{data.clouds}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-purple-400 flex items-center gap-1">
-            <Droplets className="h-3 w-3" /> Margen Rocío:
+          <span className="text-purple-400 flex items-center gap-0.5">
+            <Droplets className="h-2 w-2 sm:h-3 sm:w-3" /> Rocío:
           </span>
-          <span className="font-bold text-white">
-            Δ {data.spread}°C (T:{data.temp}° / R:{data.dewPoint}°)
-          </span>
+          <span className="font-bold text-white">Δ{data.spread}°</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sky-400 flex items-center gap-1">
-            <Eye className="h-3 w-3" /> Transparencia:
+          <span className="text-sky-400 flex items-center gap-0.5">
+            <Eye className="h-2 w-2 sm:h-3 sm:w-3" /> Trans:
           </span>
           <span className="font-bold text-white">{data.transparency}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-orange-400 flex items-center gap-1">
-            <Wind className="h-3 w-3" /> Viento / Rachas:
+          <span className="text-orange-400 flex items-center gap-0.5">
+            <Wind className="h-2 w-2 sm:h-3 sm:w-3" /> Viento:
           </span>
-          <span className="font-bold text-white">
-            {data.windSpeedKmh} / {data.windGustKmh} km/h
-          </span>
+          <span className="font-bold text-white">{data.windSpeedKmh}k</span>
         </div>
 
-        <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
-          <span className="text-amber-400 flex items-center gap-1">
-            <Sun className="h-3 w-3" /> Luz Solar:
+        <div className="flex items-center justify-between pt-0.5 border-t border-slate-800 text-[7px] sm:text-[9px]">
+          <span className="text-amber-400 flex items-center gap-0.5">
+            <Sun className="h-2 w-2 sm:h-2.5 sm:w-2.5" /> Sol:
           </span>
           <span className="font-bold text-slate-300">
-            {data.isAstroDark ? 'Noche Oscura (< -18°)' : `${data.sunlightPct}% Crepúsculo`}
+            {data.isAstroDark ? 'Oscura' : `${data.sunlightPct}%`}
           </span>
         </div>
       </div>

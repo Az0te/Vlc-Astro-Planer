@@ -25,6 +25,7 @@ const PROVIDER_NAMES: Record<WeatherProviderId, string> = {
   openweather: 'OpenWeather',
   pirateweather: 'PirateWeather',
   meteoblue: 'Meteoblue',
+  aemet: 'AEMET OpenData',
 };
 
 /**
@@ -155,6 +156,7 @@ export function parseSyncPayload(input: string): ParsedSyncResult {
           openweather: { enabled: Boolean(parsed.apiKey || parsed.openweather?.apiKey), apiKey: parsed.apiKey || parsed.openweather?.apiKey || '' },
           pirateweather: { enabled: Boolean(parsed.pirateweather?.apiKey), apiKey: parsed.pirateweather?.apiKey || '' },
           meteoblue: { enabled: Boolean(parsed.meteoblue?.apiKey), apiKey: parsed.meteoblue?.apiKey || '' },
+          aemet: { enabled: Boolean(parsed.aemet?.apiKey), apiKey: parsed.aemet?.apiKey || '' },
         },
       };
     }
@@ -181,6 +183,10 @@ export function parseSyncPayload(input: string): ParsedSyncResult {
         enabled: Boolean(settingsToUse.providers.meteoblue?.enabled),
         apiKey: String(settingsToUse.providers.meteoblue?.apiKey || '').trim(),
       },
+      aemet: {
+        enabled: Boolean(settingsToUse.providers.aemet?.enabled),
+        apiKey: String(settingsToUse.providers.aemet?.apiKey || '').trim(),
+      },
     };
 
     const finalSettings: MultiModelSettings = {
@@ -191,7 +197,7 @@ export function parseSyncPayload(input: string): ParsedSyncResult {
     };
 
     // Build human readable summary
-    const activeProvidersSummary = (['openmeteo', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
+    const activeProvidersSummary = (['openmeteo', 'aemet', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
       (id) => ({
         id,
         name: PROVIDER_NAMES[id],

@@ -204,7 +204,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
             },
           }));
         }
-      } else if (id === 'meteoblue') {
+        } else if (id === 'meteoblue') {
         const res = await fetch(
           `https://my.meteoblue.com/packages/basic-day?apikey=${key}&lat=40.4168&lon=-3.7038&format=json`
         );
@@ -219,6 +219,37 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
             [id]: {
               success: false,
               message: 'Error al verificar con Meteoblue. Comprueba tu clave de API.',
+            },
+          }));
+        }
+      } else if (id === 'aemet') {
+        const res = await fetch(
+          `https://opendata.aemet.es/opendata/api/prediccion/especifica/diaria/municipio/28079?api_key=${encodeURIComponent(key)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.estado === 200 || data.datos) {
+            setTestResults((prev) => ({
+              ...prev,
+              [id]: { success: true, message: '¡Clave de AEMET OpenData verificada con éxito!' },
+            }));
+          } else {
+            setTestResults((prev) => ({
+              ...prev,
+              [id]: { success: false, message: data.descripcion || 'Error de respuesta de AEMET.' },
+            }));
+          }
+        } else if (res.status === 429) {
+          setTestResults((prev) => ({
+            ...prev,
+            [id]: { success: true, message: 'Clave de AEMET válida (límite diario de 40 llamadas alcanzado, se usará caché).' },
+          }));
+        } else {
+          setTestResults((prev) => ({
+            ...prev,
+            [id]: {
+              success: false,
+              message: 'No se pudo validar con AEMET OpenData. Comprueba tu clave de API.',
             },
           }));
         }
@@ -397,7 +428,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
               Proveedores Meteorológicos y Claves API
             </h3>
 
-            {(['openmeteo', 'pirateweather', 'meteoblue', 'openweather'] as WeatherProviderId[]).map(
+            {(['openmeteo', 'aemet', 'pirateweather', 'meteoblue', 'openweather'] as WeatherProviderId[]).map(
               (provId) => {
                 const meta = WEATHER_PROVIDERS_META[provId];
                 const state = localSettings.providers[provId];

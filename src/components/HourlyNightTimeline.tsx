@@ -12,8 +12,8 @@ export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night 
   );
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-[#0b101e] p-6 shadow-xl space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-[#0b101e] p-3 sm:p-6 shadow-xl space-y-3 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 border-b border-slate-800/80 pb-2 sm:pb-4">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Clock className="h-4 w-4 text-cyan-400" />

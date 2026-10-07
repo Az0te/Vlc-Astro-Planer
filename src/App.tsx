@@ -7,7 +7,13 @@ import {
   WeatherDataSource,
   WeatherProviderId,
 } from './types';
-import { getAstroForecast, POPULAR_ASTRO_SPOTS } from './services/weatherService';
+import {
+  getAstroForecast,
+  POPULAR_ASTRO_SPOTS,
+  DEFAULT_FAVORITE_LOCATIONS,
+  isSameLocation,
+} from './services/weatherService';
+import { useIsAndroid } from './utils/platform';
 import { DEFAULT_MULTI_SETTINGS } from './services/ensembleService';
 import { Header } from './components/Header';
 import { EnsembleStrategyBar } from './components/EnsembleStrategyBar';
@@ -28,11 +34,28 @@ import { AlertCircle, Sparkles, QrCode, CheckCircle2, CalendarRange, ChevronDown
 const STORAGE_KEYS = {
   API_KEY: 'vlc_ow_api_key',
   LOCATION: 'vlc_astro_location',
+  FAVORITES: 'vlc_favorite_locations',
   RED_VISION: 'vlc_red_vision',
   MULTI_SETTINGS: 'vlc_multi_settings',
 };
 
 export default function App() {
+  // Favorite Locations
+  const [favorites, setFavorites] = useState<LocationData[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return DEFAULT_FAVORITE_LOCATIONS;
+  });
+
   // Location
   const [location, setLocation] = useState<LocationData>(() => {
     const saved =
@@ -46,7 +69,7 @@ export default function App() {
         // ignore
       }
     }
-    return POPULAR_ASTRO_SPOTS[0]; // Observatorio del Teide by default
+    return POPULAR_ASTRO_SPOTS[0]; // Observatorio Astronómico del CAAT by default
   });
 
   // Red vision mode for astro field use
@@ -54,12 +77,28 @@ export default function App() {
     return localStorage.getItem(STORAGE_KEYS.RED_VISION) === 'true';
   });
 
+  const isAndroid = useIsAndroid();
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.classList.toggle('is-android', isAndroid);
+    }
+  }, [isAndroid]);
+
   // Multi-Model Weather & API Settings
   const [multiSettings, setMultiSettings] = useState<MultiModelSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.MULTI_SETTINGS);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return {
+          ...DEFAULT_MULTI_SETTINGS,
+          ...parsed,
+          providers: {
+            ...DEFAULT_MULTI_SETTINGS.providers,
+            ...(parsed.providers || {}),
+          },
+        };
       } catch {
         // ignore
       }
@@ -177,6 +216,27 @@ export default function App() {
     loadForecast(newLoc, multiSettings);
   };
 
+  // Handle favorite locations toggle
+  const handleToggleFavorite = useCallback((loc: LocationData) => {
+    setFavorites((prev) => {
+      const exists = prev.some((item) => isSameLocation(item, loc));
+      let updated: LocationData[];
+      if (exists) {
+        updated = prev.filter((item) => !isSameLocation(item, loc));
+      } else {
+        updated = [loc, ...prev];
+      }
+      localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  // Handle resetting default favorites
+  const handleResetDefaultFavorites = useCallback(() => {
+    setFavorites(DEFAULT_FAVORITE_LOCATIONS);
+    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(DEFAULT_FAVORITE_LOCATIONS));
+  }, []);
+
   // Handle strategy change directly from the bar
   const handleSelectStrategy = (strategy: ForecastStrategy) => {
     const updated: MultiModelSettings = {
@@ -235,6 +295,10 @@ export default function App() {
       {/* Top sticky app header */}
       <Header
         location={location}
+        favorites={favorites}
+        onSelectLocation={handleSelectLocation}
+        onToggleFavorite={handleToggleFavorite}
+        onResetDefaultFavorites={handleResetDefaultFavorites}
         onOpenLocationModal={() => setIsLocationModalOpen(true)}
         onOpenKeyModal={() => setIsKeyModalOpen(true)}
         apiKey={multiSettings.providers.openweather?.apiKey || ''}
@@ -246,7 +310,7 @@ export default function App() {
       />
 
       {/* Main dashboard content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-2 sm:px-6 py-2.5 sm:py-6 space-y-3.5 sm:space-y-6">
         {/* Sync Success Banner */}
         {syncNotification && (
           <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-4 text-xs text-emerald-200 flex items-center justify-between gap-3 shadow-lg animate-fade-in">
@@ -339,8 +403,8 @@ export default function App() {
                 <CalendarRange className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
                 <span>
                   {showWeeklyCharts
-                    ? 'Ocultar gráfico apilado de toda la semana (7 días)'
-                    : 'Mostrar gráfico apilado de toda la semana (7 días)'}
+                    ? `Ocultar gráfico apilado (${nights.length} días)`
+                    : `Mostrar gráfico apilado (${nights.length} días)`}
                 </span>
                 <ChevronDown
                   className={`h-4 w-4 text-cyan-400 transition-transform duration-300 ${
@@ -441,6 +505,8 @@ export default function App() {
         onClose={() => setIsLocationModalOpen(false)}
         currentLocation={location}
         onSelectLocation={handleSelectLocation}
+        favorites={favorites}
+        onToggleFavorite={handleToggleFavorite}
         apiKey={multiSettings.providers.openweather?.apiKey || ''}
       />
     </div>

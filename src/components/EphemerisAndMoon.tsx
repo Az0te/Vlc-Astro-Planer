@@ -36,7 +36,7 @@ export const EphemerisAndMoon: React.FC<EphemerisAndMoonProps> = ({ night, bortl
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Sun & Twilight Ephemeris Card */}
-      <div className="rounded-3xl border border-slate-800 bg-[#0b101e] p-6 shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-[#0b101e] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
             <div className="flex items-center gap-2.5">
@@ -117,7 +117,7 @@ export const EphemerisAndMoon: React.FC<EphemerisAndMoonProps> = ({ night, bortl
       </div>
 
       {/* Moon Phase & Illumination Card */}
-      <div className="rounded-3xl border border-slate-800 bg-[#0b101e] p-6 shadow-xl flex flex-col justify-between">
+      <div className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-[#0b101e] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
             <div className="flex items-center gap-2.5">

@@ -17,11 +17,21 @@ import {
 import {
   DEFAULT_MULTI_SETTINGS,
   combineEnsembleForecasts,
+  fetchFromAemet,
   fetchFromMeteoblue,
   fetchFromPirateWeather,
 } from './ensembleService';
 
 export const POPULAR_ASTRO_SPOTS: LocationData[] = [
+  {
+    name: 'Observatorio Astronómico del CAAT',
+    country: 'España',
+    state: 'Aras de los Olmos, Valencia (Alto Turia)',
+    lat: 39.9252,
+    lon: -1.1005,
+    elevation: 1300,
+    bortleClass: 3,
+  },
   {
     name: 'Observatorio del Teide (Izaña)',
     country: 'España',
@@ -95,6 +105,18 @@ export const POPULAR_ASTRO_SPOTS: LocationData[] = [
     bortleClass: 4,
   },
 ];
+
+export const DEFAULT_FAVORITE_LOCATIONS: LocationData[] = [
+  POPULAR_ASTRO_SPOTS[0], // Observatorio Astronómico del CAAT
+  POPULAR_ASTRO_SPOTS[1], // Observatorio del Teide
+  POPULAR_ASTRO_SPOTS[2], // Roque de los Muchachos
+  POPULAR_ASTRO_SPOTS[5], // Serranía de Cuenca (Starlight)
+];
+
+export function isSameLocation(a?: LocationData | null, b?: LocationData | null): boolean {
+  if (!a || !b) return false;
+  return Math.abs(a.lat - b.lat) < 0.01 && Math.abs(a.lon - b.lon) < 0.01;
+}
 
 export async function searchLocations(query: string, apiKey?: string): Promise<LocationData[]> {
   if (!query.trim()) return [];
@@ -263,12 +285,25 @@ export async function getAstroForecast(
   }
 
   // Meteoblue
-  if (settings.providers.meteoblue.enabled) {
+  if (settings.providers.meteoblue?.enabled) {
     providerPromises.push(
       fetchFromMeteoblue(location, settings.providers.meteoblue.apiKey, baseMeteoResult.nights)
         .then((nights) => ({
           id: 'meteoblue' as WeatherProviderId,
           name: 'Meteoblue (Swiss NMM)',
+          nights,
+        }))
+        .catch(() => null)
+    );
+  }
+
+  // AEMET OpenData
+  if (settings.providers.aemet?.enabled) {
+    providerPromises.push(
+      fetchFromAemet(location, settings.providers.aemet.apiKey, baseMeteoResult.nights)
+        .then((nights) => ({
+          id: 'aemet' as WeatherProviderId,
+          name: 'AEMET (HARMONIE Meso)',
           nights,
         }))
         .catch(() => null)
@@ -309,6 +344,8 @@ export async function getAstroForecast(
         ? 'pirateweather'
         : resolved[0].id === 'meteoblue'
         ? 'meteoblue'
+        : resolved[0].id === 'aemet'
+        ? 'aemet'
         : 'openmeteo';
   }
 
@@ -367,13 +404,13 @@ async function fetchFromOpenMeteo(
     ? 'https://customer-api.open-meteo.com/v1/forecast'
     : 'https://api.open-meteo.com/v1/forecast';
   const keyParam = cleanKey ? `&apikey=${encodeURIComponent(cleanKey)}` : '';
-  const url = `${baseUrl}?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=7${keyParam}`;
+  const url = `${baseUrl}?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=8${keyParam}`;
 
   let res = await fetch(url);
   if (!res.ok && cleanKey) {
     // If request with key failed, try fallback without key to prevent failure
     try {
-      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=7`;
+      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=8`;
       const fallbackRes = await fetch(fallbackUrl);
       if (fallbackRes.ok) {
         res = fallbackRes;
@@ -391,7 +428,7 @@ async function fetchFromOpenMeteo(
 
   const now = new Date();
 
-  for (let d = 0; d < 7; d++) {
+  for (let d = 0; d < 8; d++) {
     const nightDate = new Date(now);
     nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
@@ -589,6 +626,8 @@ async function fetchFromOpenMeteo(
         low: Math.round(avgClouds * 0.3),
         mid: Math.round(avgClouds * 0.4),
         high: Math.round(avgClouds * 0.3),
+        min: hourlyItems.length > 0 ? Math.min(...hourlyItems.map((item) => item.cloudsTotal)) : avgClouds,
+        max: hourlyItems.length > 0 ? Math.max(...hourlyItems.map((item) => item.cloudsTotal)) : avgClouds,
       },
       visibility: {
         km: avgVis,
@@ -755,6 +794,8 @@ function parseOpenWeatherOneCall(data: any, location: LocationData): AstroNight[
         low: Math.round(cloudsTotal * 0.3),
         mid: Math.round(cloudsTotal * 0.4),
         high: Math.round(cloudsTotal * 0.3),
+        min: hourlyItems.length > 0 ? Math.min(...hourlyItems.map((item) => item.cloudsTotal)) : cloudsTotal,
+        max: hourlyItems.length > 0 ? Math.max(...hourlyItems.map((item) => item.cloudsTotal)) : cloudsTotal,
       },
       visibility: {
         km: visKm,
@@ -1006,7 +1047,7 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
     { clouds: 3, temp: 12, rh: 40, wind: 6, vis: 40 },    // Epic night
   ];
 
-  for (let d = 0; d < 7; d++) {
+  for (let d = 0; d < 8; d++) {
     const targetDate = new Date(now);
     targetDate.setDate(now.getDate() + d);
     targetDate.setHours(12, 0, 0, 0);
@@ -1034,6 +1075,7 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
       sampleDate.setHours(h, 0, 0, 0);
       const sunAlt = getSolarAltitude(location.lat, location.lon, sampleDate);
       const hSpread = Math.round((spread - (h - 18) * 0.12) * 10) / 10;
+      const hClouds = Math.min(100, Math.max(0, Math.round(p.clouds + Math.sin((h - 18) * 0.5) * 8)));
       hourlyItems.push({
         timestamp: sampleDate.getTime(),
         timeStr: formatLocalTime(sampleDate),
@@ -1042,10 +1084,10 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
         dewPoint,
         spread: hSpread,
         humidity: Math.min(98, p.rh + (h - 21) * 3),
-        cloudsTotal: p.clouds,
-        cloudsLow: Math.round(p.clouds * 0.2),
-        cloudsMid: Math.round(p.clouds * 0.4),
-        cloudsHigh: Math.round(p.clouds * 0.4),
+        cloudsTotal: hClouds,
+        cloudsLow: Math.round(hClouds * 0.2),
+        cloudsMid: Math.round(hClouds * 0.4),
+        cloudsHigh: Math.round(hClouds * 0.4),
         visibilityKm: p.vis,
         windSpeedKmh: p.wind,
         windGustKmh: Math.round(p.wind * 1.3),
@@ -1069,6 +1111,10 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
     const rawDayName = dayFormatter.format(targetDate);
     const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
 
+    const simCloudValues = hourlyItems.map((item) => item.cloudsTotal);
+    const minSimCloud = simCloudValues.length > 0 ? Math.min(...simCloudValues) : p.clouds;
+    const maxSimCloud = simCloudValues.length > 0 ? Math.max(...simCloudValues) : p.clouds;
+
     nights.push({
       id: `sim-night-${d}-${targetDate.getTime()}`,
       date: targetDate,
@@ -1084,6 +1130,8 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
         low: Math.round(p.clouds * 0.2),
         mid: Math.round(p.clouds * 0.4),
         high: Math.round(p.clouds * 0.4),
+        min: minSimCloud,
+        max: maxSimCloud,
       },
       visibility: {
         km: p.vis,

@@ -563,7 +563,7 @@ export const ApiSyncModal: React.FC<ApiSyncModalProps> = ({
                   APIs incluidas en este código:
                 </span>
                 <div className="flex flex-wrap gap-2 text-[11px]">
-                  {(['openmeteo', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
+                  {(['openmeteo', 'aemet', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
                     (id) => {
                       const prov = currentSettings.providers[id];
                       const hasKey = prov?.apiKey && prov.apiKey.trim().length > 0;
@@ -799,8 +799,8 @@ export const ApiSyncModal: React.FC<ApiSyncModalProps> = ({
                     dispositivo:
                   </p>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {(['openmeteo', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {(['openmeteo', 'aemet', 'openweather', 'pirateweather', 'meteoblue'] as WeatherProviderId[]).map(
                       (id) => {
                         const prov = scannedResult.settings!.providers[id];
                         const hasKey = prov?.apiKey && prov.apiKey.trim().length > 0;

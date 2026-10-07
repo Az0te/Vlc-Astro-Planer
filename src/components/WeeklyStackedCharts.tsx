@@ -145,7 +145,7 @@ export const WeeklyStackedCharts: React.FC<WeeklyStackedChartsProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-lg font-bold text-white tracking-wide">
-                Gráfico Apilado de Toda la Semana (7 Días)
+                Gráfico Apilado de Toda la Semana ({nights.length} Días)
               </h2>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                 {nights.length} Días Completos
@@ -378,8 +378,8 @@ export const WeeklyStackedCharts: React.FC<WeeklyStackedChartsProps> = ({
               </div>
 
               {/* Chart Plot Area */}
-              <div className="p-3 sm:p-4">
-                <div className="h-56 sm:h-64 w-full">
+              <div className="p-2 sm:p-4">
+                <div className="h-36 sm:h-48 md:h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                       data={points}
@@ -588,7 +588,8 @@ const CustomWeeklyTooltip = ({
   // 4 hours distance:
   const hourStep = chartWidth / Math.max(1, totalPoints - 1);
   const fourHoursDistance = Math.round(hourStep * 4);
-  const cardWidth = 230;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const cardWidth = isMobile ? 115 : 220;
 
   // If advancing past half of the screen, flip to the left side:
   const isPastHalf = cursorX > halfPoint;
@@ -598,8 +599,8 @@ const CustomWeeklyTooltip = ({
     : cursorX + fourHoursDistance;
 
   // Always keep inside chart boundaries: visible at all times, never cut off
-  const minX = chartLeft + 8;
-  const maxX = plotRight - cardWidth - 8;
+  const minX = chartLeft + 4;
+  const maxX = plotRight - cardWidth - 4;
   targetX = Math.max(minX, Math.min(maxX, targetX));
 
   return (
@@ -607,14 +608,14 @@ const CustomWeeklyTooltip = ({
       style={{
         transform: `translateX(${targetX}px)`,
       }}
-      className="pointer-events-none select-none rounded-xl border border-cyan-500/40 bg-slate-950/95 p-3 text-xs shadow-2xl backdrop-blur-md text-slate-200 space-y-1.5 w-[230px]"
+      className="pointer-events-none select-none rounded-xl border border-cyan-500/40 bg-slate-950/95 p-1.5 sm:p-3 text-[8px] sm:text-xs shadow-2xl backdrop-blur-md text-slate-200 space-y-0.5 sm:space-y-1.5 w-[115px] sm:w-[220px]"
     >
-      <div className="flex items-center justify-between border-b border-slate-800 pb-1 font-mono">
-        <span className="font-bold text-white truncate max-w-[140px]">
-          {nightName} • {data.timeStr} h
+      <div className="flex items-center justify-between border-b border-slate-800 pb-0.5 sm:pb-1 font-mono">
+        <span className="font-bold text-white truncate max-w-[70px] sm:max-w-[140px] text-[8px] sm:text-xs">
+          {nightName} • {data.timeStr}h
         </span>
         <span
-          className={`px-1.5 py-0.2 rounded font-bold ${
+          className={`px-1 sm:px-1.5 py-0.2 rounded font-bold text-[7.5px] sm:text-[10px] ${
             data.score >= 70
               ? 'bg-emerald-500/20 text-emerald-300'
               : data.score >= 50
@@ -622,56 +623,56 @@ const CustomWeeklyTooltip = ({
               : 'bg-rose-500/20 text-rose-300'
           }`}
         >
-          {data.score}/100
+          {data.score}
         </span>
       </div>
 
-      <div className="space-y-1 text-[11px] font-mono">
+      <div className="space-y-0.5 sm:space-y-1 text-[7.5px] sm:text-[11px] font-mono leading-tight">
         <div className="flex items-center justify-between">
-          <span className="text-cyan-400 flex items-center gap-1">
-            <Sparkles className="h-3 w-3" /> Night Score:
+          <span className="text-cyan-400 flex items-center gap-0.5 sm:gap-1">
+            <Sparkles className="h-2 w-2 sm:h-3 sm:w-3" /> Score:
           </span>
           <span className="font-bold text-white">{data.score}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-rose-400 flex items-center gap-1">
-            <Cloud className="h-3 w-3" /> Nubosidad:
+          <span className="text-rose-400 flex items-center gap-0.5 sm:gap-1">
+            <Cloud className="h-2 w-2 sm:h-3 sm:w-3" /> Nubes:
           </span>
           <span className="font-bold text-white">{data.clouds}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-purple-400 flex items-center gap-1">
-            <Droplets className="h-3 w-3" /> Margen Rocío:
+          <span className="text-purple-400 flex items-center gap-0.5 sm:gap-1">
+            <Droplets className="h-2 w-2 sm:h-3 sm:w-3" /> Rocío:
           </span>
-          <span className="font-bold text-white">
-            Δ {data.spread}°C (T:{data.temp}° / R:{data.dewPoint}°)
+          <span className="font-bold text-white truncate max-w-[55px] sm:max-w-none">
+            Δ{data.spread}°
           </span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sky-400 flex items-center gap-1">
-            <Eye className="h-3 w-3" /> Transparencia:
+          <span className="text-sky-400 flex items-center gap-0.5 sm:gap-1">
+            <Eye className="h-2 w-2 sm:h-3 sm:w-3" /> Transp:
           </span>
           <span className="font-bold text-white">{data.transparency}%</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-orange-400 flex items-center gap-1">
-            <Wind className="h-3 w-3" /> Viento / Rachas:
+          <span className="text-orange-400 flex items-center gap-0.5 sm:gap-1">
+            <Wind className="h-2 w-2 sm:h-3 sm:w-3" /> Viento:
           </span>
           <span className="font-bold text-white">
-            {data.windSpeed} / {data.windGust} km/h
+            {data.windSpeed}k
           </span>
         </div>
 
-        <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
-          <span className="text-amber-400 flex items-center gap-1">
-            <Sun className="h-3 w-3" /> Luz Solar:
+        <div className="flex items-center justify-between pt-0.5 sm:pt-1 border-t border-slate-800 text-[7px] sm:text-[10px]">
+          <span className="text-amber-400 flex items-center gap-0.5 sm:gap-1">
+            <Sun className="h-2 w-2 sm:h-3 sm:w-3" /> Sol:
           </span>
           <span className="font-bold text-slate-300">
-            {data.isDark ? 'Noche Oscura (< -18°)' : `${data.sunlightPct}% Crepúsculo`}
+            {data.isDark ? 'Oscuro' : `${data.sunlightPct}%`}
           </span>
         </div>
       </div>

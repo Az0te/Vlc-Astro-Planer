@@ -55,6 +55,8 @@ export interface AstroNight {
     low: number;
     mid: number;
     high: number;
+    min?: number;
+    max?: number;
   };
   visibility: {
     km: number;
@@ -122,7 +124,12 @@ export interface AstroNight {
 
 export type ForecastStrategy = 'worst' | 'average' | 'best';
 
-export type WeatherProviderId = 'openmeteo' | 'openweather' | 'pirateweather' | 'meteoblue';
+export type WeatherProviderId =
+  | 'openmeteo'
+  | 'openweather'
+  | 'pirateweather'
+  | 'meteoblue'
+  | 'aemet';
 
 export interface ProviderModelValue {
   providerId: string;
@@ -142,6 +149,7 @@ export interface MultiModelSettings {
     openweather: { enabled: boolean; apiKey: string };
     pirateweather: { enabled: boolean; apiKey: string };
     meteoblue: { enabled: boolean; apiKey: string };
+    aemet: { enabled: boolean; apiKey: string };
   };
 }
 
@@ -152,6 +160,7 @@ export type WeatherDataSource =
   | 'openmeteo'
   | 'pirateweather'
   | 'meteoblue'
+  | 'aemet'
   | 'ensemble_worst'
   | 'ensemble_average'
   | 'ensemble_best';

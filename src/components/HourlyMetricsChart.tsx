@@ -1135,9 +1135,10 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                     key={`cloud-layers-${item.id}`}
                     onMouseEnter={() => setActivePoint(item)}
                     onClick={() => setActivePoint(item)}
-                    title={`${item.time} h: Nubes altas ${highPct}% · medias ${midPct}% · bajas ${lowPct}%`}
-                    className={`flex-1 min-w-[34px] flex flex-col items-center justify-between h-[46px] cursor-pointer rounded-md py-0.5 transition-all ${
-                      isSelected ? 'bg-cyan-500/10 ring-1 ring-cyan-400/40' : ''
+                    className={`flex-1 min-w-[34px] flex flex-col items-center justify-between h-[46px] cursor-pointer rounded-lg border py-0.5 transition-all ${
+                      isSelected
+                        ? 'bg-cyan-500/10 border-cyan-400/50 ring-1 ring-cyan-300 z-20 shadow-lg'
+                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-600 hover:bg-slate-800/50'
                     }`}
                   >
                     {/* Nubes altas ≈25%: arriba de la mini-tabla */}
@@ -1330,6 +1331,15 @@ const CustomMainChartTooltip = ({
           </span>
           <span className="font-bold text-white">{data.clouds}%</span>
         </div>
+
+        {data.rawItem && (
+          <div className="flex items-center justify-between text-[6.5px] sm:text-[8.5px] text-slate-400 -mt-0.5">
+            <span className="pl-2.5 sm:pl-3.5">Alt/Med/Baj:</span>
+            <span className="font-bold text-slate-300">
+              {data.rawItem.cloudsHigh}% · {data.rawItem.cloudsMid}% · {data.rawItem.cloudsLow}%
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="text-purple-400 flex items-center gap-0.5">

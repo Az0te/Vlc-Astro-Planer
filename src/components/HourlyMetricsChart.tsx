@@ -38,6 +38,13 @@ interface HourlyMetricsChartProps {
 type MetricView = 'all' | 'score' | 'wind' | 'clouds' | 'transparency' | 'visibility' | 'sunlight';
 type TimelineSpan = '7days' | '48h' | '1night';
 
+// El viento se dibuja en el mismo eje compartido 0-100% que el resto de
+// métricas. Para que el límite de guiado seguro (20 km/h) se vea a mitad de
+// la gráfica en vez de aplastado abajo, se reescala: 20 km/h -> 50%,
+// 40 km/h -> 100% (tope del eje). El valor real en km/h se sigue mostrando
+// en el tooltip y en las tarjetas, esto solo afecta a la posición visual.
+const WIND_PCT_PER_KMH = 2.5;
+
 export interface ChartPoint {
   id: string;
   dayId: string;
@@ -51,6 +58,8 @@ export interface ChartPoint {
   visibilityPct: number;
   windSpeedKmh: number;
   windGustKmh: number;
+  windSpeedPct: number;
+  windGustPct: number;
   isAstroDark: boolean;
   sunAlt: number;
   sunlightPct: number;
@@ -318,6 +327,11 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
           visibilityPct: Math.min(100, Math.round((item.visibilityKm / maxVis) * 100)),
           windSpeedKmh: item.windSpeedKmh || n.wind.avgKmh,
           windGustKmh: item.windGustKmh || Math.round((item.windSpeedKmh || n.wind.avgKmh) * 1.3),
+          windSpeedPct: Math.min(100, Math.round((item.windSpeedKmh || n.wind.avgKmh) * WIND_PCT_PER_KMH)),
+          windGustPct: Math.min(
+            100,
+            Math.round((item.windGustKmh || Math.round((item.windSpeedKmh || n.wind.avgKmh) * 1.3)) * WIND_PCT_PER_KMH)
+          ),
           isAstroDark: item.isAstronomicalNight,
           sunAlt: item.sunAltitudeDeg,
           sunlightPct: sun.sunlightPct,
@@ -914,7 +928,7 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                 {/* Reference line for Telescope Mount Guiding Threshold (20 km/h) */}
                 {(activeView === 'all' || activeView === 'wind') && (
                   <ReferenceLine
-                    y={20}
+                    y={20 * WIND_PCT_PER_KMH}
                     yAxisId="left"
                     stroke="#f43f5e"
                     strokeDasharray="4 4"
@@ -1030,7 +1044,7 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                     <Area
                       yAxisId="left"
                       type="monotone"
-                      dataKey="windSpeedKmh"
+                      dataKey="windSpeedPct"
                       name="Viento (km/h)"
                       stroke="#14b8a6"
                       strokeWidth={2}
@@ -1041,7 +1055,7 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
                     <Line
                       yAxisId="left"
                       type="monotone"
-                      dataKey="windGustKmh"
+                      dataKey="windGustPct"
                       name="Rachas de viento (km/h)"
                       stroke="#f59e0b"
                       strokeWidth={1.5}
@@ -1100,9 +1114,69 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
             </ResponsiveContainer>
           </div>
 
+          {/* NUBES POR ALTURA, HORA A HORA
+              Un icono de nube por capa (alta / media / baja). Cuanto más %
+              de cobertura hay en esa capa, más blanca/opaca se ve la nube;
+              con poca cobertura queda casi transparente. Las nubes altas se
+              dibujan arriba de esta mini-tabla, las medias en el centro y
+              las bajas abajo, aproximando su posición real en el cielo
+              (≈25% / 50% / 100% de altura). */}
+          <div style={{ width: `${chartPixelWidth}px` }} className="pt-2 px-1">
+            <div className="flex items-center gap-1 w-full">
+              {chartData.map((item) => {
+                const lowPct = item.rawItem?.cloudsLow ?? 0;
+                const midPct = item.rawItem?.cloudsMid ?? 0;
+                const highPct = item.rawItem?.cloudsHigh ?? 0;
+                const isSelected = activePoint?.id === item.id;
+                const cloudOpacity = (pct: number) => Math.max(0.08, Math.min(1, pct / 100));
+
+                return (
+                  <div
+                    key={`cloud-layers-${item.id}`}
+                    onMouseEnter={() => setActivePoint(item)}
+                    onClick={() => setActivePoint(item)}
+                    title={`${item.time} h: Nubes altas ${highPct}% · medias ${midPct}% · bajas ${lowPct}%`}
+                    className={`flex-1 min-w-[34px] flex flex-col items-center justify-between h-[46px] cursor-pointer rounded-md py-0.5 transition-all ${
+                      isSelected ? 'bg-cyan-500/10 ring-1 ring-cyan-400/40' : ''
+                    }`}
+                  >
+                    {/* Nubes altas ≈25%: arriba de la mini-tabla */}
+                    <Cloud
+                      className="h-3 w-3 shrink-0"
+                      style={{ color: '#ffffff', opacity: cloudOpacity(highPct) }}
+                      strokeWidth={2.5}
+                      fill="#ffffff"
+                      fillOpacity={cloudOpacity(highPct) * 0.6}
+                    />
+                    {/* Nubes medias ≈50%: centro */}
+                    <Cloud
+                      className="h-3.5 w-3.5 shrink-0"
+                      style={{ color: '#ffffff', opacity: cloudOpacity(midPct) }}
+                      strokeWidth={2.5}
+                      fill="#ffffff"
+                      fillOpacity={cloudOpacity(midPct) * 0.6}
+                    />
+                    {/* Nubes bajas ≈100%: abajo de la mini-tabla */}
+                    <Cloud
+                      className="h-4 w-4 shrink-0"
+                      style={{ color: '#ffffff', opacity: cloudOpacity(lowPct) }}
+                      strokeWidth={2.5}
+                      fill="#ffffff"
+                      fillOpacity={cloudOpacity(lowPct) * 0.6}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5 pl-1 text-[9px] text-slate-500 font-mono">
+              <Cloud className="h-2.5 w-2.5 text-slate-500" strokeWidth={2.5} />
+              <span>Nubes por altura (arriba=altas · medio=medias · abajo=bajas, más blanco = más cobertura)</span>
+            </div>
+          </div>
+
           {/* PEQUEÑA BARRA DE SCORE DE CADA HORA
               Color: Rojo < 50, Naranja 50-60, Verde > 60 */}
-          <div style={{ width: `${chartPixelWidth}px` }} className="pt-2 px-1">
+          <div style={{ width: `${chartPixelWidth}px` }} className="pt-1 px-1">
             <div className="flex items-center gap-1 w-full">
               {chartData.map((item) => {
                 const style = getScoreSegmentStyle(item.nightScore);

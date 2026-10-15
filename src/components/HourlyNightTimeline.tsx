@@ -152,7 +152,7 @@ export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night 
                         : 'text-teal-400'
                     }`}
                   >
-                    $\Delta${item.spread}°
+                    Δ{item.spread}°
                   </span>
                 </div>
               </button>
@@ -221,7 +221,7 @@ export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night 
                   selectedHour.spread <= 1.5 ? 'text-rose-400' : 'text-slate-400'
                 }`}
               >
-                Margen $\Delta$: {selectedHour.spread}°C
+                Margen Δ: {selectedHour.spread}°C
               </span>
             </div>
 

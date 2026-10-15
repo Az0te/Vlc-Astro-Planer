@@ -290,7 +290,7 @@ function parsePirateWeatherHourly(data: any, location: LocationData): AstroNight
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,
-      summary: `PirateWeather: Score ${overallAstro.score}/100. Nubes ${avgClouds}%, viento ${avgWind} km/h, rocío mín $\\Delta$${minSpread}°C.`,
+      summary: `PirateWeather: Score ${overallAstro.score}/100. Nubes ${avgClouds}%, viento ${avgWind} km/h, rocío mín Δ${minSpread}°C.`,
       clouds: {
         total: avgClouds,
         low: Math.round(avgClouds * 0.3),
@@ -1268,7 +1268,7 @@ export function combineEnsembleForecasts(
           : overallScore >= 28
           ? '#f97316'
           : '#ef4444',
-      summary: `Pronóstico ${stratMeta.title} (${providerForecasts.length} modelos): Score ${overallScore}/100. Nubosidad ${avgClouds}%, viento ${avgWind} km/h (rachas ${maxGust} km/h), rocío mín $\\Delta$${minSpread}°C.`,
+      summary: `Pronóstico ${stratMeta.title} (${providerForecasts.length} modelos): Score ${overallScore}/100. Nubosidad ${avgClouds}%, viento ${avgWind} km/h (rachas ${maxGust} km/h), rocío mín Δ${minSpread}°C.`,
       clouds: {
         total: avgClouds,
         low: Math.round(avgClouds * 0.3),
@@ -1294,7 +1294,7 @@ export function combineEnsembleForecasts(
         heatersAdvised: minSpread <= 3.5,
         advice:
           minSpread <= 1.8
-            ? `¡Alerta de rocío (${stratMeta.title})! Margen crítico de $\\Delta$${minSpread}°C.`
+            ? `¡Alerta de rocío (${stratMeta.title})! Margen crítico de Δ${minSpread}°C.`
             : `Rocío bajo control según pronóstico ${stratMeta.title}.`,
       },
       wind: {

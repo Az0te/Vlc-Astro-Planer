@@ -12,6 +12,16 @@ body.red-vision {
   background-color: #0d0000 !important;
 }
 
+/* Oculta la barra de scroll pero mantiene el scroll funcional (usado por
+   el grupo de controles del header para quedar en una sola línea) */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge Chromium */
+}
+
 /* Custom subtle scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

@@ -159,7 +159,7 @@ export const TargetRecommender: React.FC<TargetRecommenderProps> = ({ night }) =
             <span>Lista de comprobación de campo (Astrofoto)</span>
           </span>
           <p className="text-slate-400">
-            Punto de rocío a {dew.avgDewPoint}°C (Margen $\Delta$: {dew.minSpread}°C). {dew.advice}
+            Punto de rocío a {dew.avgDewPoint}°C (Margen Δ: {dew.minSpread}°C). {dew.advice}
           </p>
         </div>
 

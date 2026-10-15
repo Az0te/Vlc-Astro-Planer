@@ -445,6 +445,9 @@ async function fetchFromOpenMeteo(
     // Filter hourly data that falls into the astronomical night (e.g. from 18:00 of nightDate to 08:00 next morning)
     const hourlyItems: HourlyForecastItem[] = [];
     let cloudSum = 0;
+    let lowCloudSum = 0;
+    let midCloudSum = 0;
+    let highCloudSum = 0;
     let visSum = 0;
     let rhSum = 0;
     let dewSum = 0;
@@ -517,10 +520,14 @@ async function fetchFromOpenMeteo(
         spread,
         windKmh,
         moon.illuminationPct,
-        isMoonUp && isAstroDark
+        isMoonUp && isAstroDark,
+        { low: lowClouds, mid: midClouds, high: highClouds }
       );
 
       cloudSum += clouds;
+      lowCloudSum += lowClouds;
+      midCloudSum += midClouds;
+      highCloudSum += highClouds;
       visSum += visKm;
       rhSum += rh;
       dewSum += dew;
@@ -565,6 +572,9 @@ async function fetchFromOpenMeteo(
 
     const count = Math.max(1, hourlyItems.length);
     const avgClouds = Math.round(cloudSum / count);
+    const avgLowClouds = Math.round(lowCloudSum / count);
+    const avgMidClouds = Math.round(midCloudSum / count);
+    const avgHighClouds = Math.round(highCloudSum / count);
     const avgVis = Math.round(visSum / count);
     const avgRh = Math.round(rhSum / count);
     const avgDew = Math.round((dewSum / count) * 10) / 10;
@@ -580,7 +590,8 @@ async function fetchFromOpenMeteo(
       minSpread,
       avgWindSpeed,
       moon.illuminationPct,
-      moon.phaseFraction > 0.3 && moon.phaseFraction < 0.7
+      moon.phaseFraction > 0.3 && moon.phaseFraction < 0.7,
+      { low: avgLowClouds, mid: avgMidClouds, high: avgHighClouds }
     );
 
     let visStatus: 'Excepcional' | 'Muy buena' | 'Buena' | 'Moderada' | 'Pobre' | 'Niebla' = 'Buena';
@@ -624,12 +635,12 @@ async function fetchFromOpenMeteo(
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,
-      summary: `${overallAstro.label} para astrofotografía: ${avgClouds}% nubes, rocío mín a $\\Delta$${minSpread}°C, luna al ${moon.illuminationPct}%.`,
+      summary: `${overallAstro.label} para astrofotografía: ${avgClouds}% nubes, rocío mín a Δ${minSpread}°C, luna al ${moon.illuminationPct}%.`,
       clouds: {
         total: avgClouds,
-        low: Math.round(avgClouds * 0.3),
-        mid: Math.round(avgClouds * 0.4),
-        high: Math.round(avgClouds * 0.3),
+        low: avgLowClouds,
+        mid: avgMidClouds,
+        high: avgHighClouds,
         min: hourlyItems.length > 0 ? Math.min(...hourlyItems.map((item) => item.cloudsTotal)) : avgClouds,
         max: hourlyItems.length > 0 ? Math.max(...hourlyItems.map((item) => item.cloudsTotal)) : avgClouds,
       },
@@ -795,7 +806,7 @@ function parseOpenWeatherOneCall(data: any, location: LocationData): AstroNight[
       astroScore: astroScore.score,
       ratingLabel: astroScore.label,
       ratingColor: astroScore.color,
-      summary: `Previsión OpenWeather: ${cloudsTotal}% nubes, visibilidad ${visKm}km, rocío a ${dewPoint}°C (Spread $\\Delta$${spread}°C).`,
+      summary: `Previsión OpenWeather: ${cloudsTotal}% nubes, visibilidad ${visKm}km, rocío a ${dewPoint}°C (Spread Δ${spread}°C).`,
       clouds: {
         total: cloudsTotal,
         low: Math.round(cloudsTotal * 0.3),
@@ -1130,7 +1141,7 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
       astroScore: astro.score,
       ratingLabel: astro.label,
       ratingColor: astro.color,
-      summary: `Score ${astro.score}/100 (${astro.label}). Nubosidad ${p.clouds}%, visibilidad ${p.vis}km, rocío a ${dewPoint}°C (Spread $\\Delta$${spread}°C).`,
+      summary: `Score ${astro.score}/100 (${astro.label}). Nubosidad ${p.clouds}%, visibilidad ${p.vis}km, rocío a ${dewPoint}°C (Spread Δ${spread}°C).`,
       clouds: {
         total: p.clouds,
         low: Math.round(p.clouds * 0.2),

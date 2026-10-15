@@ -177,7 +177,8 @@ export function computeAstroScore(
   dewSpread: number, // temp - dewPoint
   windKmh: number,
   moonIllumPct: number,
-  isMoonUp: boolean
+  isMoonUp: boolean,
+  cloudLayers?: { low?: number; mid?: number; high?: number }
 ): {
   score: number;
   label: 'Épica' | 'Excelente' | 'Buena' | 'Aceptable' | 'Regular' | 'Inviable';
@@ -189,13 +190,28 @@ export function computeAstroScore(
   dewRiskLevel: 'Bajo' | 'Moderado' | 'Alto' | 'Crítico';
 } {
   // 1. Cloud penalty (Weight 45%)
-  // Even light clouds destroy long exposures
+  // Even light clouds destroy long exposures.
+  // When per-layer cloud data is available (nubes altas/medias/bajas), las
+  // nubes altas (cirros) pesan más: son persistentes y degradan la
+  // transparencia de todo el cielo incluso con poca cobertura, mientras que
+  // las nubes bajas suelen ser más localizadas/pasajeras y pesan algo menos.
+  let effectiveCloudsPct = cloudsPct;
+  if (cloudLayers && (cloudLayers.high !== undefined || cloudLayers.mid !== undefined || cloudLayers.low !== undefined)) {
+    const high = cloudLayers.high ?? 0;
+    const mid = cloudLayers.mid ?? 0;
+    const low = cloudLayers.low ?? 0;
+    const layerWeighted = Math.min(100, high * 1.15 + mid * 0.9 + low * 0.65);
+    // Se mezcla con la cobertura total reportada para que una sola capa
+    // no desvíe la puntuación más de lo razonable, pero sí influya.
+    effectiveCloudsPct = Math.min(100, Math.round(cloudsPct * 0.5 + layerWeighted * 0.5));
+  }
+
   let cloudScore = 100;
-  if (cloudsPct <= 5) cloudScore = 100;
-  else if (cloudsPct <= 15) cloudScore = 85;
-  else if (cloudsPct <= 30) cloudScore = 55;
-  else if (cloudsPct <= 50) cloudScore = 25;
-  else if (cloudsPct <= 75) cloudScore = 8;
+  if (effectiveCloudsPct <= 5) cloudScore = 100;
+  else if (effectiveCloudsPct <= 15) cloudScore = 85;
+  else if (effectiveCloudsPct <= 30) cloudScore = 55;
+  else if (effectiveCloudsPct <= 50) cloudScore = 25;
+  else if (effectiveCloudsPct <= 75) cloudScore = 8;
   else cloudScore = 0;
 
   // 2. Transparency Score (Weight 20%)
@@ -275,8 +291,8 @@ export function computeAstroScore(
     dewScore * 0.08;
 
   // If cloud coverage is over 80%, capped score to unusable
-  if (cloudsPct >= 80) totalScore = Math.min(totalScore, 15);
-  if (cloudsPct >= 50) totalScore = Math.min(totalScore, 42);
+  if (effectiveCloudsPct >= 80) totalScore = Math.min(totalScore, 15);
+  if (effectiveCloudsPct >= 50) totalScore = Math.min(totalScore, 42);
 
   const rounded = Math.max(0, Math.min(100, Math.round(totalScore)));
 

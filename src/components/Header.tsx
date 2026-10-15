@@ -128,10 +128,12 @@ export const Header: React.FC<HeaderProps> = ({
           <p className="hidden sm:block text-[11px] text-slate-400">Previsión y planificación para astrofotografía</p>
         </div>
 
-        {/* Location & Controls */}
-        <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
+        {/* Location & Controls: se fuerzan en una sola línea (sin wrap); si no caben
+            todas en pantallas muy estrechas, el grupo se desplaza horizontalmente
+            en vez de partirse en varias filas. */}
+        <div className="flex items-center flex-nowrap gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar max-w-full">
           {/* Unified Compact Location & Quick Favorites Pill: [ 📍 Location B_ | ⭐⌄ ] */}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative shrink-0" ref={dropdownRef}>
             <div className="flex items-center rounded-xl border border-slate-700/80 bg-slate-900/90 transition hover:border-slate-600 overflow-hidden shadow-sm">
               {/* Left segment: Current Location click opens full search modal */}
               <button
@@ -329,12 +331,12 @@ export const Header: React.FC<HeaderProps> = ({
           {/* OpenWeather API Key button */}
           <button
             onClick={onOpenKeyModal}
-            className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800/90 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-slate-200 transition"
+            className="flex shrink-0 items-center gap-1 sm:gap-1.5 whitespace-nowrap rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800/90 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-slate-200 transition"
             title="Configurar clave API OpenWeather y fuentes meteorológicas"
           >
-            <Key className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
+            <Key className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 shrink-0" />
             <span className="hidden sm:inline">API:</span>
-            <span className={`text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded border ${sourceBadge.color}`}>
+            <span className={`max-w-[84px] sm:max-w-none truncate text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded border ${sourceBadge.color}`}>
               {sourceBadge.label}
             </span>
           </button>
@@ -342,14 +344,14 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Red Vision Mode Toggle (Astro Red Light) */}
           <button
             onClick={onToggleRedVision}
-            className={`flex items-center gap-1 sm:gap-1.5 rounded-xl border px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold transition ${
+            className={`flex shrink-0 items-center gap-1 sm:gap-1.5 whitespace-nowrap rounded-xl border px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold transition ${
               isRedVision
                 ? 'bg-red-600 text-white border-red-500 ring-2 ring-red-500/50 shadow-lg shadow-red-600/30'
                 : 'border-slate-700/80 bg-slate-900/80 hover:bg-slate-800 text-slate-300'
             }`}
             title="Activar/Desactivar luz roja astronómica para no perder adaptación a la oscuridad"
           >
-            <span className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isRedVision ? 'bg-white animate-ping' : 'bg-red-500'}`} />
+            <span className={`h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0 rounded-full ${isRedVision ? 'bg-white animate-ping' : 'bg-red-500'}`} />
             <span className="hidden md:inline">Luz Roja</span>
           </button>
 
@@ -357,7 +359,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white transition disabled:opacity-50"
+            className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white transition disabled:opacity-50"
             title="Actualizar previsión"
           >
             <RefreshCw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isRefreshing ? 'animate-spin text-cyan-400' : ''}`} />

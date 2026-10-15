@@ -178,10 +178,11 @@ export default function App() {
           setErrorNotice(result.errorNotice);
         }
         if (result.nights.length > 0) {
-          // Keep current selection if still valid, or default to first
+          // Keep current selection if still valid, or default to ongoing night or tonight
+          const primaryNight = result.nights.find((n) => n.isOngoing || n.isTonight) || result.nights[0];
           setSelectedNightId((prev) => {
             const exists = result.nights.some((n) => n.id === prev);
-            return exists ? prev : result.nights[0].id;
+            return exists ? prev : primaryNight.id;
           });
         }
       } catch (err: any) {

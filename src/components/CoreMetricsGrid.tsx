@@ -55,26 +55,26 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
       case 'Bajo':
         return {
           badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-          icon: <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400" />,
+          icon: <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-400" />,
           title: 'Seguro',
         };
       case 'Moderado':
         return {
           badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-          icon: <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />,
+          icon: <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-400" />,
           title: 'Vigilar',
         };
       case 'Alto':
         return {
           badge: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-          icon: <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-400" />,
+          icon: <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-400" />,
           title: 'Calentador',
         };
       case 'Crítico':
       default:
         return {
           badge: 'bg-rose-500/15 text-rose-400 border-rose-500/30 animate-pulse',
-          icon: <ShieldAlert className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-rose-400" />,
+          icon: <ShieldAlert className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-rose-400" />,
           title: 'Condensación',
         };
     }
@@ -161,14 +161,14 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
   const seeingBadge = getSeeingBadge(currentSeeing);
 
   return (
-    <div className="space-y-2.5 sm:space-y-3">
+    <div className="space-y-2 sm:space-y-2.5">
       {/* Interactive Hour indicator banner if hovering any hour bar */}
       <div className="flex items-center justify-between px-1 text-xs text-slate-400">
         <span className="flex items-center gap-1.5">
           {activeHour ? (
             <>
-              <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-cyan-400 animate-ping" />
-              <span className="font-semibold text-cyan-300 text-[11px] sm:text-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span className="font-semibold text-cyan-300 text-[10.5px] sm:text-xs">
                 A las {activeHour.timeStr} h
               </span>
               <span className="hidden sm:inline text-[11px] text-slate-500">
@@ -191,56 +191,56 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         )}
       </div>
 
-      {/* METRIC CARDS IN 2 COLUMNS AND 3 ROWS (Nubosidad, Viento, Transparencia, Visibilidad, Punto de Rocío, Seeing) */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3.5">
+      {/* METRIC CARDS IN 2 COLUMNS AND 3 ROWS (Un poco más pequeños y menos separados entre ellos) */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-2.5">
         {/* 1. NUBOSIDAD (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
-                  <Cloud className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
+                  <Cloud className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Nubes
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Por horas</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Por horas</span>
                 </div>
               </div>
-              <span className={`text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[70px] sm:max-w-none ${cloudBadge.color}`}>
+              <span className={`text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[65px] sm:max-w-none ${cloudBadge.color}`}>
                 {cloudBadge.text}
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">{currentClouds}%</span>
-                <span className="text-[9px] sm:text-[11px] text-slate-400">cubierto</span>
+                <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">{currentClouds}%</span>
+                <span className="text-[8.5px] sm:text-[10.5px] text-slate-400">cubierto</span>
               </div>
               {activeHour && (
-                <span className="text-[9px] sm:text-[10px] font-mono font-bold text-cyan-400 bg-slate-800/90 px-1 py-0.2 rounded">
+                <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-cyan-400 bg-slate-800/90 px-1 py-0.2 rounded">
                   {activeHour.timeStr}h
                 </span>
               )}
             </div>
 
             {/* Cloud layers */}
-            <div className="mt-1.5 sm:mt-2.5 grid grid-cols-3 gap-0.5 sm:gap-1 text-center text-[9px] sm:text-[10px] bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60">
+            <div className="mt-1 sm:mt-2 grid grid-cols-3 gap-0.5 text-center text-[8px] sm:text-[9px] bg-slate-950/40 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
               <div>
-                <span className="text-slate-500 block text-[8px] sm:text-[9px]">Bajas</span>
+                <span className="text-slate-500 block text-[7.5px] sm:text-[8px]">Bajas</span>
                 <span className="font-mono font-bold text-slate-300">
                   {activeHour ? activeHour.cloudsLow : clouds.low}%
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[8px] sm:text-[9px]">Medias</span>
+                <span className="text-slate-500 block text-[7.5px] sm:text-[8px]">Medias</span>
                 <span className="font-mono font-bold text-slate-300">
                   {activeHour ? activeHour.cloudsMid : clouds.mid}%
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[8px] sm:text-[9px]">Cirros</span>
+                <span className="text-slate-500 block text-[7.5px] sm:text-[8px]">Cirros</span>
                 <span className="font-mono font-bold text-slate-300">
                   {activeHour ? activeHour.cloudsHigh : clouds.high}%
                 </span>
@@ -249,13 +249,13 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
           </div>
 
           {/* Hourly Mini-Bars for Clouds */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-slate-400 font-medium">Noche</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const heightPct = Math.max(12, Math.min(100, h.cloudsTotal));
                 const barColor =
@@ -288,55 +288,55 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         </div>
 
         {/* 2. VIENTO & MONTURA / GUIADO (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shrink-0">
-                  <Wind className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20 shrink-0">
+                  <Wind className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Viento
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Guiado</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Guiado</span>
                 </div>
               </div>
-              <span className={`text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[70px] sm:max-w-none ${windBadge.badge}`}>
+              <span className={`text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[65px] sm:max-w-none ${windBadge.badge}`}>
                 {windBadge.status}
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">{currentWindSpeed}</span>
-                  <span className="text-[10px] sm:text-xs text-slate-400">km/h</span>
+                  <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">{currentWindSpeed}</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-400">km/h</span>
                 </div>
-                <span className="text-[9px] sm:text-[10px] text-amber-400 font-medium block">
+                <span className="text-[8px] sm:text-[9.5px] text-amber-400 font-medium block">
                   Racha: {currentWindGust}k
                 </span>
               </div>
               {activeHour && (
-                <span className="text-[9px] sm:text-[10px] font-mono font-bold text-teal-400 bg-slate-800/90 px-1 py-0.2 rounded">
+                <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-teal-400 bg-slate-800/90 px-1 py-0.2 rounded">
                   {activeHour.timeStr}h
                 </span>
               )}
             </div>
 
-            <p className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60">
+            <p className="mt-1 sm:mt-1.5 text-[8.5px] sm:text-[9.5px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 rounded-lg border border-slate-800/60">
               {windBadge.advice}
             </p>
           </div>
 
           {/* Hourly Mini-Bars for Wind Speed & Gusts */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-teal-400 font-medium">Rachas</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const maxRef = Math.max(35, ...hourly.map((it) => it.windGustKmh || it.windSpeedKmh));
                 const heightPct = Math.max(15, Math.min(100, Math.round((h.windSpeedKmh / maxRef) * 100)));
@@ -370,52 +370,52 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         </div>
 
         {/* 3. TRANSPARENCIA ATMOSFÉRICA (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
-                  <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+                  <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Transparencia
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Claridad</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Claridad</span>
                 </div>
               </div>
-              <span className="text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border bg-purple-500/15 text-purple-300 border-purple-500/30">
+              <span className="text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border bg-purple-500/15 text-purple-300 border-purple-500/30">
                 {currentTransScore >= 75 ? 'Excelente' : currentTransScore >= 50 ? 'Buena' : 'Pobre'}
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">{currentTransScore}</span>
-                <span className="text-[9px] sm:text-[11px] text-slate-400">/ 100</span>
+                <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">{currentTransScore}</span>
+                <span className="text-[8.5px] sm:text-[10.5px] text-slate-400">/ 100</span>
               </div>
               {activeHour && (
-                <span className="text-[9px] sm:text-[10px] font-mono font-bold text-purple-300 bg-slate-800/90 px-1 py-0.2 rounded">
+                <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-purple-300 bg-slate-800/90 px-1 py-0.2 rounded">
                   {activeHour.timeStr}h
                 </span>
               )}
             </div>
 
-            <p className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60">
+            <p className="mt-1 sm:mt-1.5 text-[8.5px] sm:text-[9.5px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 rounded-lg border border-slate-800/60">
               {currentTransScore >= 75
                 ? 'Atmósfera limpia y contrastada.'
-                : 'Contraste moderado por aerosol/humedad.'}
+                : 'Contraste moderado por aerosol.'}
             </p>
           </div>
 
           {/* Hourly Mini-Bars for Transparency */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-purple-300 font-medium">Claridad</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const heightPct = Math.max(15, h.transparencyScore);
                 const barColor =
@@ -448,53 +448,53 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         </div>
 
         {/* 4. VISIBILIDAD (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
-                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
+                  <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Visibilidad
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Alcance</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Alcance</span>
                 </div>
               </div>
-              <span className="text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border bg-sky-500/15 text-sky-300 border-sky-500/30">
+              <span className="text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border bg-sky-500/15 text-sky-300 border-sky-500/30">
                 {currentVisKm >= 25 ? 'Óptima' : currentVisKm >= 15 ? 'Buena' : 'Bruma'}
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">{currentVisKm}</span>
-                <span className="text-[10px] sm:text-xs text-slate-400">km</span>
+                <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">{currentVisKm}</span>
+                <span className="text-[9px] sm:text-[11px] text-slate-400">km</span>
               </div>
               {activeHour && (
-                <span className="text-[9px] sm:text-[10px] font-mono font-bold text-sky-300 bg-slate-800/90 px-1 py-0.2 rounded">
+                <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-sky-300 bg-slate-800/90 px-1 py-0.2 rounded">
                   {activeHour.timeStr}h
                 </span>
               )}
             </div>
 
-            <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] text-slate-300 bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60 flex items-center justify-between">
+            <div className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] text-slate-300 bg-slate-950/40 p-1 rounded-lg border border-slate-800/60 flex items-center justify-between">
               <span>Horizonte:</span>
               <span className="font-mono font-bold text-cyan-300">
-                {currentVisKm >= 25 ? 'Despejado' : 'Calima leve'}
+                {currentVisKm >= 25 ? 'Despejado' : 'Calima'}
               </span>
             </div>
           </div>
 
           {/* Hourly Mini-Bars for Visibility */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-sky-400 font-medium">Óptica</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const maxVis = Math.max(30, ...hourly.map((it) => it.visibilityKm));
                 const heightPct = Math.max(15, Math.min(100, Math.round((h.visibilityKm / maxVis) * 100)));
@@ -523,42 +523,42 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         </div>
 
         {/* 5. PUNTO DE ROCÍO & CONDENSACIÓN (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-                  <Droplets className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <Droplets className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Rocío
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Humedad</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Humedad</span>
                 </div>
               </div>
-              <span className={`text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border flex items-center gap-1 ${dewBadge.badge}`}>
+              <span className={`text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border flex items-center gap-1 ${dewBadge.badge}`}>
                 {dewBadge.icon}
                 <span>{dewBadge.title}</span>
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div>
                 <div className="flex items-baseline gap-0.5">
-                  <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
                     {currentDewPoint > 0 ? `+${currentDewPoint}` : currentDewPoint}°
                   </span>
-                  <span className="text-[10px] sm:text-xs text-slate-400">C</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-400">C</span>
                 </div>
-                <span className="text-[8.5px] sm:text-[10px] text-slate-400 block truncate">
+                <span className="text-[8px] sm:text-[9.5px] text-slate-400 block truncate">
                   T: {activeHour ? activeHour.temp : dew.minTemp}°C
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold block">ΔT</span>
+                <span className="text-[7.5px] sm:text-[8.5px] text-slate-400 uppercase font-bold block">ΔT</span>
                 <span
-                  className={`text-xs sm:text-sm font-mono font-bold ${
+                  className={`text-[11px] sm:text-sm font-mono font-bold ${
                     currentSpread <= 2.0
                       ? 'text-rose-400'
                       : currentSpread <= 3.5
@@ -571,7 +571,7 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
               </div>
             </div>
 
-            <div className="mt-1.5 sm:mt-2 text-[8.5px] sm:text-[10px] text-slate-300 bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60 flex items-center justify-between">
+            <div className="mt-1 sm:mt-1.5 text-[8px] sm:text-[9px] text-slate-300 bg-slate-950/40 p-1 rounded-lg border border-slate-800/60 flex items-center justify-between">
               <span>Cintas:</span>
               <span className={`font-bold ${currentSpread <= 3.0 ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {currentSpread <= 3.0 ? 'Requeridas' : 'Seguro'}
@@ -580,13 +580,13 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
           </div>
 
           {/* Hourly Mini-Bars for Spread (Delta T Margin) */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-emerald-400 font-medium">Margen ΔT</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const heightPct = Math.max(15, Math.min(100, Math.round((h.spread / 8) * 100)));
                 const barColor =
@@ -615,52 +615,52 @@ export const CoreMetricsGrid: React.FC<CoreMetricsGridProps> = ({ night }) => {
         </div>
 
         {/* 6. SEEING & CALIDAD ÓPTICA (por horas) */}
-        <div className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 p-2.5 sm:p-4 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-3 backdrop-blur-sm relative overflow-hidden flex flex-col justify-between group hover:border-slate-700 transition">
           <div>
             <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
-                  <Telescope className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                  <Telescope className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
                 <div>
-                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                  <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                     Seeing
                   </span>
-                  <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono hidden sm:inline">Turbulencia</span>
+                  <span className="text-[7.5px] sm:text-[8.5px] text-slate-500 font-mono hidden sm:inline">Turbulencia</span>
                 </div>
               </div>
-              <span className={`text-[8.5px] sm:text-[10px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[70px] sm:max-w-none ${seeingBadge.badge}`}>
+              <span className={`text-[8px] sm:text-[9.5px] font-semibold px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border truncate max-w-[65px] sm:max-w-none ${seeingBadge.badge}`}>
                 {seeingBadge.text}
               </span>
             </div>
 
-            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+            <div className="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-0.5">
-                <span className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+                <span className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
                   {currentSeeing.toFixed(1)}&quot;
                 </span>
-                <span className="text-[9px] sm:text-[11px] text-slate-400">arcsec</span>
+                <span className="text-[8.5px] sm:text-[10.5px] text-slate-400">arcsec</span>
               </div>
               {activeHour && (
-                <span className="text-[9px] sm:text-[10px] font-mono font-bold text-indigo-400 bg-slate-800/90 px-1 py-0.2 rounded">
+                <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold text-indigo-400 bg-slate-800/90 px-1 py-0.2 rounded">
                   {activeHour.timeStr}h
                 </span>
               )}
             </div>
 
-            <p className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800/60">
+            <p className="mt-1 sm:mt-1.5 text-[8.5px] sm:text-[9.5px] text-slate-300 line-clamp-2 leading-tight bg-slate-950/40 p-1 rounded-lg border border-slate-800/60">
               {seeingBadge.desc}
             </p>
           </div>
 
           {/* Hourly Mini-Bars for Seeing */}
-          <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-500 mb-0.5 sm:mb-1">
+          <div className="mt-1.5 sm:mt-2.5 pt-1 sm:pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[7.5px] sm:text-[8.5px] font-mono text-slate-500 mb-0.5">
               <span>{hourly[0]?.timeStr || '18h'}</span>
               <span className="text-indigo-400 font-medium">Resolución</span>
               <span>{hourly[hourly.length - 1]?.timeStr || '08h'}</span>
             </div>
-            <div className="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-8 bg-slate-950/60 p-0.5 sm:p-1 rounded-lg border border-slate-800/60">
+            <div className="flex items-end gap-0.5 h-4 sm:h-6 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/60">
               {hourly.map((h, idx) => {
                 const sVal = h.seeingArcsec || 2.2;
                 // Lower arcsec = better seeing = taller bar

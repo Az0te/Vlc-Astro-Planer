@@ -12,6 +12,7 @@ import {
   calculateNightTwilights,
   computeAstroScore,
   formatLocalTime,
+  getAstroNightMeta,
   getMoonDetails,
   getSolarAltitude,
 } from '../utils/astronomy';
@@ -165,12 +166,15 @@ function parsePirateWeatherHourly(data: any, location: LocationData): AstroNight
   const hourlyData = data.hourly?.data || [];
   const nights: AstroNight[] = [];
   const now = new Date();
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? 6 : 7;
 
-  for (let d = 0; d < 7; d++) {
+  for (let d = startDay; d < endDay; d++) {
     const nightDate = new Date(now);
     nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(nightDate, 'pw', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, nightDate);
     const moon = getMoonDetails(nightDate);
 
@@ -276,17 +280,13 @@ function parsePirateWeatherHourly(data: any, location: LocationData): AstroNight
       moon.phaseFraction > 0.3 && moon.phaseFraction < 0.7
     );
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(nightDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     nights.push({
-      id: `pw-${d}-${nightDate.getTime()}`,
+      id: meta.id,
       date: nightDate,
-      dateStr: dateFormatter.format(nightDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,
@@ -396,12 +396,15 @@ function parseMeteoblueHourly(data: any, location: LocationData): AstroNight[] {
 
   const nights: AstroNight[] = [];
   const now = new Date();
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? 6 : 7;
 
-  for (let d = 0; d < 7; d++) {
+  for (let d = startDay; d < endDay; d++) {
     const nightDate = new Date(now);
     nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(nightDate, 'mb', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, nightDate);
     const moon = getMoonDetails(nightDate);
 
@@ -500,17 +503,13 @@ function parseMeteoblueHourly(data: any, location: LocationData): AstroNight[] {
       moon.phaseFraction > 0.3 && moon.phaseFraction < 0.7
     );
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(nightDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     nights.push({
-      id: `mb-${d}-${nightDate.getTime()}`,
+      id: meta.id,
       date: nightDate,
-      dateStr: dateFormatter.format(nightDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,
@@ -738,13 +737,17 @@ function parseAemetHourly(data: any, location: LocationData): AstroNight[] {
   const dias = data[0].prediccion.dia;
   const nights: AstroNight[] = [];
   const now = new Date();
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? Math.min(dias.length - 1, 6) : Math.min(dias.length, 7);
 
-  for (let d = 0; d < Math.min(dias.length, 7); d++) {
-    const diaObj = dias[d];
-    const diaFechaStr = diaObj.fecha || '';
-    const nightDate = diaFechaStr ? new Date(diaFechaStr) : new Date(now.getTime() + d * 86400000);
+  for (let d = startDay; d < endDay; d++) {
+    const diaIndex = Math.max(0, d);
+    const diaObj = dias[diaIndex] || dias[0];
+    const nightDate = new Date(now);
+    nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(nightDate, 'aemet', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, nightDate);
     const moon = getMoonDetails(nightDate);
 
@@ -757,17 +760,19 @@ function parseAemetHourly(data: any, location: LocationData): AstroNight[] {
     let minSpread = 999;
     let maxGust = 0;
 
-    const estadoCieloArr = diaObj.estadoCielo || [];
-    const tempArr = diaObj.temperatura || [];
-    const rhArr = diaObj.humedadRelativa || [];
-    const vientoArr = diaObj.viento || [];
-    const rachaArr = diaObj.rachaMax || [];
-
     for (let h = 18; h <= 32; h++) {
       const sampleDate = new Date(nightDate);
       sampleDate.setHours(h, 0, 0, 0);
       const actualHour = sampleDate.getHours();
       const hourStr = actualHour.toString().padStart(2, '0');
+
+      // For hours past midnight (h >= 24), read from next day's forecast if available
+      const targetDia = (h >= 24 && dias[diaIndex + 1]) ? dias[diaIndex + 1] : diaObj;
+      const estadoCieloArr = targetDia.estadoCielo || [];
+      const tempArr = targetDia.temperatura || [];
+      const rhArr = targetDia.humedadRelativa || [];
+      const vientoArr = targetDia.viento || [];
+      const rachaArr = targetDia.rachaMax || [];
 
       // Match item by periodo "HH"
       const ecMatch = estadoCieloArr.find((e: any) => e.periodo === hourStr);
@@ -868,17 +873,13 @@ function parseAemetHourly(data: any, location: LocationData): AstroNight[] {
       moon.phaseFraction > 0.3 && moon.phaseFraction < 0.7
     );
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(nightDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     nights.push({
-      id: `aemet-${d}-${nightDate.getTime()}`,
+      id: meta.id,
       date: nightDate,
-      dateStr: dateFormatter.format(nightDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,

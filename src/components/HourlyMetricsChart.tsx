@@ -852,7 +852,10 @@ export const HourlyMetricsChart: React.FC<HourlyMetricsChartProps> = ({
         >
           {/* Day Headers along the top of the timeline so you know which day you are looking at */}
           <div style={{ width: `${chartPixelWidth}px` }} className="flex border-b border-slate-800/80 pb-1 px-3 mb-1">
-            {nights.slice(0, timelineSpan === '1night' ? 1 : timelineSpan === '48h' ? 2 : 7).map((n) => (
+            {(timelineSpan === '7days'
+              ? nights
+              : nights.slice(currentNightIndex, currentNightIndex + (timelineSpan === '48h' ? 2 : 1))
+            ).map((n) => (
               <div key={n.id} className="flex-1 min-w-[280px] text-left px-2 flex items-center gap-1.5">
                 <span className="text-[11px] font-mono font-bold text-cyan-400 uppercase tracking-wide">
                   {n.dayName} ({n.dateStr})

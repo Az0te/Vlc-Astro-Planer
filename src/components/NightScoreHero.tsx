@@ -73,8 +73,15 @@ export const NightScoreHero: React.FC<NightScoreHeroProps> = ({ night }) => {
                 Noche {ratingLabel}
               </span>
               {night.isTonight && (
-                <span className="px-2 sm:px-2.5 py-0.2 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  Esta Noche
+                <span className="px-2 sm:px-2.5 py-0.2 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5">
+                  {night.isOngoing ? (
+                    <>
+                      <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Noche en curso</span>
+                    </>
+                  ) : (
+                    'Esta Noche'
+                  )}
                 </span>
               )}
             </div>

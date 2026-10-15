@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AstroNight, HourlyForecastItem } from '../types';
 import { Clock, ShieldAlert, Sparkles, Wind, Eye, Droplets, Cloud, Info } from 'lucide-react';
 
@@ -7,9 +7,34 @@ interface HourlyNightTimelineProps {
 }
 
 export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night }) => {
-  const [selectedHour, setSelectedHour] = useState<HourlyForecastItem | null>(
-    night.hourly[Math.min(3, night.hourly.length - 1)] || null
-  );
+  // Find current active hour if currently within this night, otherwise default to peak dark hour
+  const defaultHour = useMemo(() => {
+    if (!night.hourly || night.hourly.length === 0) return null;
+    const nowMs = Date.now();
+    const firstMs = night.hourly[0].timestamp;
+    const lastMs = night.hourly[night.hourly.length - 1].timestamp;
+
+    // If current time is within or close to this night's bounds, pick the closest hour
+    if (nowMs >= firstMs - 1800000 && nowMs <= lastMs + 1800000) {
+      let closest = night.hourly[0];
+      let minDiff = Infinity;
+      for (const h of night.hourly) {
+        const diff = Math.abs(h.timestamp - nowMs);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = h;
+        }
+      }
+      return closest;
+    }
+    return night.hourly[Math.min(3, night.hourly.length - 1)];
+  }, [night]);
+
+  const [selectedHour, setSelectedHour] = useState<HourlyForecastItem | null>(defaultHour);
+
+  useEffect(() => {
+    setSelectedHour(defaultHour);
+  }, [defaultHour]);
 
   return (
     <div className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-[#0b101e] p-3 sm:p-6 shadow-xl space-y-3 sm:space-y-6">
@@ -42,6 +67,7 @@ export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night 
         <div className="flex gap-2 min-w-[700px]">
           {night.hourly.map((item) => {
             const isSelected = selectedHour?.timestamp === item.timestamp;
+            const isNow = Math.abs(item.timestamp - Date.now()) < 1800000;
 
             return (
               <button
@@ -53,10 +79,17 @@ export const HourlyNightTimeline: React.FC<HourlyNightTimelineProps> = ({ night 
                     : 'border-slate-800/80 bg-slate-900/50 hover:bg-slate-800/50 hover:border-slate-700'
                 }`}
               >
-                {/* Time */}
-                <span className="text-xs font-mono font-bold text-white block">
-                  {item.timeStr}
-                </span>
+                {/* Time & Now Badge */}
+                <div className="flex flex-col items-center">
+                  <span className="text-xs font-mono font-bold text-white block">
+                    {item.timeStr}
+                  </span>
+                  {isNow && (
+                    <span className="text-[8px] font-extrabold uppercase px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mt-0.5">
+                      Ahora
+                    </span>
+                  )}
+                </div>
 
                 {/* Astro darkness tag */}
                 <span

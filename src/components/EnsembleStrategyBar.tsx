@@ -56,7 +56,7 @@ export const EnsembleStrategyBar: React.FC<EnsembleStrategyBarProps> = ({
         </div>
 
         {/* Strategy Selector Pills */}
-        <div className="w-full md:w-auto flex items-center justify-between sm:justify-end gap-1.5 p-1 rounded-xl bg-slate-900/90 border border-slate-800">
+        <div className="w-full md:w-auto flex items-center justify-between sm:justify-end gap-1 p-0.5 sm:p-1 rounded-xl bg-slate-900/90 border border-slate-800 overflow-x-auto">
           {strategies.map((strat) => {
             const meta = STRATEGY_DETAILS[strat];
             const isSelected = currentStrategy === strat;
@@ -65,20 +65,15 @@ export const EnsembleStrategyBar: React.FC<EnsembleStrategyBarProps> = ({
                 key={strat}
                 onClick={() => onSelectStrategy(strat)}
                 disabled={disabled}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`relative flex items-center justify-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10.5px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 flex-1 sm:flex-initial ${
                   isSelected
-                    ? `${meta.badgeColor} border font-bold shadow-md shadow-black/40 scale-[1.02]`
+                    ? `${meta.badgeColor} border font-bold shadow-md shadow-black/40 scale-[1.01]`
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
                 } disabled:opacity-50`}
                 title={meta.description}
               >
-                <span className="text-sm leading-none">{meta.icon}</span>
-                <span>{meta.title}</span>
-                {isSelected && (
-                  <span className="hidden lg:inline text-[10px] opacity-75">
-                    ({strat === 'worst' ? 'Pesimista' : strat === 'best' ? 'Optimista' : 'Media'})
-                  </span>
-                )}
+                <span className="text-xs sm:text-sm leading-none shrink-0">{meta.icon}</span>
+                <span className="whitespace-nowrap">{meta.title}</span>
               </button>
             );
           })}
@@ -87,29 +82,33 @@ export const EnsembleStrategyBar: React.FC<EnsembleStrategyBarProps> = ({
         {/* Open Config Modal button */}
         <button
           onClick={onOpenConfigModal}
-          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white transition shrink-0"
+          className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-700/80 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white transition shrink-0"
           title="Configurar claves de OpenWeather, PirateWeather, Meteoblue"
         >
-          <Sliders className="h-3.5 w-3.5 text-cyan-400" />
+          <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-cyan-400" />
           <span>Configurar APIs</span>
         </button>
       </div>
 
       {/* Dynamic Strategy Explanation Footer */}
-      <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-2">
-          <span className="text-base">{STRATEGY_DETAILS[currentStrategy].icon}</span>
-          <span className="text-slate-300 font-medium">
-            {STRATEGY_DETAILS[currentStrategy].title}:
-          </span>
-          <span className="text-slate-400 line-clamp-1">
+      <div className="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] text-slate-400">
+        <div className="space-y-0.5 sm:space-y-1">
+          {/* Title on 1 single line */}
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <span className="text-sm sm:text-base leading-none">{STRATEGY_DETAILS[currentStrategy].icon}</span>
+            <span className="text-slate-200 font-bold text-xs sm:text-sm whitespace-nowrap">
+              {STRATEGY_DETAILS[currentStrategy].title}
+            </span>
+          </div>
+          {/* Description right below the title */}
+          <p className="text-slate-400 text-[10px] sm:text-[11px] leading-relaxed">
             {STRATEGY_DETAILS[currentStrategy].description}
-          </span>
+          </p>
         </div>
         {!hasMultiple && (
           <button
             onClick={onOpenConfigModal}
-            className="text-cyan-400 hover:text-cyan-300 font-medium underline underline-offset-2 shrink-0 ml-2 hidden sm:inline"
+            className="text-cyan-400 hover:text-cyan-300 font-medium underline underline-offset-2 shrink-0 self-start sm:self-center text-[10px] sm:text-[11px]"
           >
             Activar más APIs para comparar
           </button>

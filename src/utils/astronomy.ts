@@ -314,3 +314,97 @@ export function computeAstroScore(
     dewRiskLevel,
   };
 }
+
+export interface AstroNightMeta {
+  id: string;
+  dayName: string;
+  isTonight: boolean;
+  isOngoing: boolean;
+  dateStr: string;
+}
+
+/**
+ * Format local YYYY-MM-DDTHH prefix for exact matching with weather APIs
+ */
+export function formatLocalIsoHour(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  return `${y}-${m}-${d}T${h}`;
+}
+
+/**
+ * Compute night labels and state preserving current night past midnight.
+ * In astronomy, the night beginning at dusk on day D continues past midnight into the morning of D+1.
+ * If user checks the app past midnight (< 12:00 noon), that night is STILL the active/ongoing night!
+ */
+export function getAstroNightMeta(
+  nightDate: Date,
+  prefix = 'night',
+  now = new Date()
+): AstroNightMeta {
+  const y = nightDate.getFullYear();
+  const m = String(nightDate.getMonth() + 1).padStart(2, '0');
+  const d = String(nightDate.getDate()).padStart(2, '0');
+  const id = `${prefix}-${y}-${m}-${d}`;
+
+  const currentHour = now.getHours();
+
+  // Normalize to calendar day (midnight) to compare dates
+  const normNight = new Date(nightDate.getFullYear(), nightDate.getMonth(), nightDate.getDate()).getTime();
+  const normNow = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const diffDays = Math.round((normNight - normNow) / 86400000);
+
+  const rawDayName = nightDate.toLocaleDateString('es-ES', { weekday: 'long' });
+  const dayNameCap = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
+  const nextDate = new Date(nightDate);
+  nextDate.setDate(nextDate.getDate() + 1);
+
+  const dateStr = `${nightDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} → ${nextDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}`;
+
+  let dayName = dayNameCap;
+  let isTonight = false;
+  let isOngoing = false;
+
+  if (diffDays === -1) {
+    // Night that started yesterday evening
+    if (currentHour < 12) {
+      if (currentHour < 8) {
+        dayName = 'Esta noche (en curso)';
+        isTonight = true;
+        isOngoing = true;
+      } else {
+        dayName = 'Noche pasada';
+        isTonight = false;
+        isOngoing = false;
+      }
+    } else {
+      dayName = 'Anoche';
+      isTonight = false;
+      isOngoing = false;
+    }
+  } else if (diffDays === 0) {
+    // Night that starts today evening
+    if (currentHour < 8) {
+      dayName = 'Próxima noche (hoy)';
+      isTonight = false;
+      isOngoing = false;
+    } else {
+      dayName = 'Esta noche';
+      isTonight = true;
+      isOngoing = currentHour >= 19;
+    }
+  } else if (diffDays === 1) {
+    dayName = 'Mañana';
+    isTonight = false;
+    isOngoing = false;
+  } else if (diffDays === 2) {
+    dayName = 'Pasado mañana';
+    isTonight = false;
+    isOngoing = false;
+  }
+
+  return { id, dayName, isTonight, isOngoing, dateStr };
+}
+

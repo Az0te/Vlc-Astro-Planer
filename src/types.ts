@@ -44,6 +44,7 @@ export interface AstroNight {
   dateStr: string;
   dayName: string;
   isTonight: boolean;
+  isOngoing?: boolean;
   astroScore: number; // 0-100
   ratingLabel: 'Épica' | 'Excelente' | 'Buena' | 'Aceptable' | 'Regular' | 'Inviable';
   ratingColor: string;

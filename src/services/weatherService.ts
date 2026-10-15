@@ -10,7 +10,9 @@ import {
   calculateDewPoint,
   calculateNightTwilights,
   computeAstroScore,
+  formatLocalIsoHour,
   formatLocalTime,
+  getAstroNightMeta,
   getMoonDetails,
   getSolarAltitude,
 } from '../utils/astronomy';
@@ -404,13 +406,13 @@ async function fetchFromOpenMeteo(
     ? 'https://customer-api.open-meteo.com/v1/forecast'
     : 'https://api.open-meteo.com/v1/forecast';
   const keyParam = cleanKey ? `&apikey=${encodeURIComponent(cleanKey)}` : '';
-  const url = `${baseUrl}?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=8${keyParam}`;
+  const url = `${baseUrl}?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&past_days=1&forecast_days=8${keyParam}`;
 
   let res = await fetch(url);
   if (!res.ok && cleanKey) {
     // If request with key failed, try fallback without key to prevent failure
     try {
-      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&forecast_days=8`;
+      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_gusts_10m,surface_pressure&daily=sunrise,sunset&timezone=auto&past_days=1&forecast_days=8`;
       const fallbackRes = await fetch(fallbackUrl);
       if (fallbackRes.ok) {
         res = fallbackRes;
@@ -427,16 +429,20 @@ async function fetchFromOpenMeteo(
   const nights: AstroNight[] = [];
 
   const now = new Date();
+  // If after midnight (00:00 to 11:59), include the ongoing night that started yesterday
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? 7 : 8;
 
-  for (let d = 0; d < 8; d++) {
+  for (let d = startDay; d < endDay; d++) {
     const nightDate = new Date(now);
     nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(nightDate, 'night', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, nightDate);
     const moon = getMoonDetails(nightDate);
 
-    // Filter hourly data that falls into the astronomical night (e.g. from 20:00 of nightDate to 07:00 next morning)
+    // Filter hourly data that falls into the astronomical night (e.g. from 18:00 of nightDate to 08:00 next morning)
     const hourlyItems: HourlyForecastItem[] = [];
     let cloudSum = 0;
     let visSum = 0;
@@ -451,10 +457,13 @@ async function fetchFromOpenMeteo(
     for (let h = 18; h <= 32; h++) {
       const sampleDate = new Date(nightDate);
       sampleDate.setHours(h, 0, 0, 0);
-      const isoPrefix = sampleDate.toISOString().slice(0, 13); // "YYYY-MM-DDTHH"
+      const localPrefix = formatLocalIsoHour(sampleDate);
+      const utcPrefix = sampleDate.toISOString().slice(0, 13);
 
-      // Find index in hourly.time
-      const idx = hourly.time.findIndex((t: string) => t.startsWith(isoPrefix));
+      // Find index in hourly.time matching either local ISO or UTC prefix
+      const idx = hourly.time.findIndex(
+        (t: string) => t.startsWith(localPrefix) || t.startsWith(utcPrefix)
+      );
       let temp = 10;
       let rh = 65;
       let dew = 4;
@@ -582,12 +591,6 @@ async function fetchFromOpenMeteo(
     else if (avgVis >= 2) visStatus = 'Pobre';
     else visStatus = 'Niebla';
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(nightDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-    const dateStr = dateFormatter.format(nightDate);
-
     // Dew risk analysis
     let dewAdvice = 'Riesgo de rocío bajo. Condiciones secas en los tubos ópticos.';
     const condensationExpected = minSpread <= 2.0;
@@ -612,11 +615,12 @@ async function fetchFromOpenMeteo(
     }
 
     nights.push({
-      id: `night-${d}-${nightDate.getTime()}`,
+      id: meta.id,
       date: nightDate,
-      dateStr,
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: overallAstro.score,
       ratingLabel: overallAstro.label,
       ratingColor: overallAstro.color,
@@ -699,10 +703,17 @@ function parseOpenWeatherOneCall(data: any, location: LocationData): AstroNight[
   const daily = data.daily || [];
   const hourly = data.hourly || [];
 
-  for (let d = 0; d < Math.min(7, daily.length); d++) {
-    const dayData = daily[d];
-    const nightDate = new Date(dayData.dt * 1000);
+  const now = new Date();
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? Math.min(6, daily.length - 1) : Math.min(7, daily.length);
+
+  for (let d = startDay; d < endDay; d++) {
+    const nightDate = new Date(now);
+    nightDate.setDate(now.getDate() + d);
     nightDate.setHours(12, 0, 0, 0);
+
+    const dayData = (d >= 0 && daily[d]) ? daily[d] : (daily[0] || {});
+    const meta = getAstroNightMeta(nightDate, 'ow-night', now);
 
     const ephemeris = calculateNightTwilights(location.lat, location.lon, nightDate);
     const moon = getMoonDetails(nightDate);
@@ -774,17 +785,13 @@ function parseOpenWeatherOneCall(data: any, location: LocationData): AstroNight[
       });
     }
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(nightDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     nights.push({
-      id: `ow-night-${d}-${nightDate.getTime()}`,
+      id: meta.id,
       date: nightDate,
-      dateStr: dateFormatter.format(nightDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: astroScore.score,
       ratingLabel: astroScore.label,
       ratingColor: astroScore.color,
@@ -861,23 +868,25 @@ function parseOpenWeatherStandard(data: any, location: LocationData): AstroNight
   const list = data.list || [];
   const nights: AstroNight[] = [];
   const now = new Date();
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? 6 : 7;
 
   // Group by day
-  for (let d = 0; d < 7; d++) {
+  for (let d = startDay; d < endDay; d++) {
     const targetDate = new Date(now);
     targetDate.setDate(now.getDate() + d);
     targetDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(targetDate, 'std-night', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, targetDate);
     const moon = getMoonDetails(targetDate);
 
-    // Filter items belonging to evening/night
+    // Filter items belonging to evening/night from 18:00 to 08:00 next morning
+    const startMs = new Date(targetDate).setHours(18, 0, 0, 0);
+    const endMs = new Date(targetDate.getTime() + 86400000).setHours(8, 0, 0, 0);
     const nightItems = list.filter((item: any) => {
-      const itemDate = new Date(item.dt * 1000);
-      return (
-        itemDate.getDate() === targetDate.getDate() &&
-        (itemDate.getHours() >= 18 || itemDate.getHours() <= 6)
-      );
+      const itemMs = item.dt * 1000;
+      return itemMs >= startMs && itemMs <= endMs;
     });
 
     let avgCloud = 20;
@@ -954,17 +963,13 @@ function parseOpenWeatherStandard(data: any, location: LocationData): AstroNight
       });
     }
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(targetDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     nights.push({
-      id: `std-night-${d}-${targetDate.getTime()}`,
+      id: meta.id,
       date: targetDate,
-      dateStr: dateFormatter.format(targetDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: astroScore.score,
       ratingLabel: astroScore.label,
       ratingColor: astroScore.color,
@@ -1047,14 +1052,19 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
     { clouds: 3, temp: 12, rh: 40, wind: 6, vis: 40 },    // Epic night
   ];
 
-  for (let d = 0; d < 8; d++) {
+  const startDay = now.getHours() < 12 ? -1 : 0;
+  const endDay = startDay === -1 ? 7 : 8;
+
+  for (let d = startDay; d < endDay; d++) {
     const targetDate = new Date(now);
     targetDate.setDate(now.getDate() + d);
     targetDate.setHours(12, 0, 0, 0);
 
+    const meta = getAstroNightMeta(targetDate, 'sim-night', now);
     const ephemeris = calculateNightTwilights(location.lat, location.lon, targetDate);
     const moon = getMoonDetails(targetDate);
-    const p = pattern[d % pattern.length];
+    const pIdx = ((d % pattern.length) + pattern.length) % pattern.length;
+    const p = pattern[pIdx];
 
     const dewPoint = calculateDewPoint(p.temp, p.rh);
     const spread = Math.round((p.temp - dewPoint) * 10) / 10;
@@ -1106,21 +1116,17 @@ function generateSimulated7Days(location: LocationData): AstroNight[] {
       });
     }
 
-    const dayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
-    const rawDayName = dayFormatter.format(targetDate);
-    const dayName = rawDayName.charAt(0).toUpperCase() + rawDayName.slice(1);
-
     const simCloudValues = hourlyItems.map((item) => item.cloudsTotal);
     const minSimCloud = simCloudValues.length > 0 ? Math.min(...simCloudValues) : p.clouds;
     const maxSimCloud = simCloudValues.length > 0 ? Math.max(...simCloudValues) : p.clouds;
 
     nights.push({
-      id: `sim-night-${d}-${targetDate.getTime()}`,
+      id: meta.id,
       date: targetDate,
-      dateStr: dateFormatter.format(targetDate),
-      dayName: d === 0 ? 'Esta noche' : d === 1 ? 'Mañana' : dayName,
-      isTonight: d === 0,
+      dateStr: meta.dateStr,
+      dayName: meta.dayName,
+      isTonight: meta.isTonight,
+      isOngoing: meta.isOngoing,
       astroScore: astro.score,
       ratingLabel: astro.label,
       ratingColor: astro.color,
